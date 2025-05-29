@@ -14,7 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.magiik.coteline",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "minVersion": "13.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +38,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "495c814e-888e-4339-ac5b-ae19695c221b"
+      }
     }
   }
 }
