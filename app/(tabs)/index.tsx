@@ -2,6 +2,8 @@ import React from 'react';
 import { Text, View, ScrollView, Pressable } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from 'expo-router';
+import { projects } from '../../data/mockData';
 
 export default function ProjectsScreen() {
   return (
@@ -39,100 +41,97 @@ export default function ProjectsScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.projectCard}>
-          <View style={styles.projectHeader}>
-            <View style={styles.projectInfo}>
-              <Text style={styles.projectName}>Résidence Les Chênes</Text>
-              <Text style={styles.projectClient}>Dupont Constructions</Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>En cours</Text>
-            </View>
-          </View>
-          
-          <View style={styles.projectDetails}>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="window" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>24 fenêtres</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="door-front" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>8 portes</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="euro" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>45 250€</Text>
-            </View>
-          </View>
+        {projects.slice(0, 3).map((project) => {
+          const getStatusColor = (statut: string) => {
+            switch (statut) {
+              case 'en_cours': return '#4CAF50';
+              case 'brouillon': return '#FF9800';
+              case 'termine': return '#2196F3';
+              case 'annule': return '#F44336';
+              default: return '#757575';
+            }
+          };
 
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressLabel}>Avancement: 65%</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '65%' }]} />
-            </View>
-          </View>
-        </View>
+          const getStatusLabel = (statut: string) => {
+            switch (statut) {
+              case 'en_cours': return 'En cours';
+              case 'brouillon': return 'Brouillon';
+              case 'termine': return 'Terminé';
+              case 'annule': return 'Annulé';
+              default: return statut;
+            }
+          };
 
-        <View style={styles.projectCard}>
-          <View style={styles.projectHeader}>
-            <View style={styles.projectInfo}>
-              <Text style={styles.projectName}>Maison individuelle</Text>
-              <Text style={styles.projectClient}>Martin Rénovation</Text>
-            </View>
-            <View style={[styles.statusBadge, styles.statusPending]}>
-              <Text style={styles.statusText}>Devis</Text>
-            </View>
-          </View>
-          
-          <View style={styles.projectDetails}>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="window" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>12 fenêtres</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="door-front" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>4 portes</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="euro" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>28 900€</Text>
-            </View>
-          </View>
-        </View>
+          const formatPrice = (price: number) => {
+            return new Intl.NumberFormat('fr-FR', {
+              style: 'currency',
+              currency: 'EUR'
+            }).format(price);
+          };
 
-        <View style={styles.projectCard}>
-          <View style={styles.projectHeader}>
-            <View style={styles.projectInfo}>
-              <Text style={styles.projectName}>Immeuble centre-ville</Text>
-              <Text style={styles.projectClient}>Société Habitat Plus</Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>En cours</Text>
-            </View>
-          </View>
-          
-          <View style={styles.projectDetails}>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="window" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>156 fenêtres</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="door-front" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>48 portes</Text>
-            </View>
-            <View style={styles.projectStat}>
-              <MaterialIcons name="euro" size={16} color="#757575" />
-              <Text style={styles.projectStatText}>185 600€</Text>
-            </View>
-          </View>
+          const totalProductCount = project.produits.reduce((total, produit) => {
+            return total + produit.quantite;
+          }, 0);
 
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressLabel}>Avancement: 20%</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '20%' }]} />
-            </View>
-          </View>
-        </View>
+          const totalPrice = project.produits.reduce((total, produit) => {
+            return total + (produit.prixUnitaire || 0) * produit.quantite;
+          }, 0);
+
+          // Calcul du pourcentage d'avancement (simulé)
+          const getProgress = () => {
+            if (project.statut === 'termine') return 100;
+            if (project.statut === 'brouillon') return 0;
+            if (project.statut === 'en_cours') {
+              // Simuler un pourcentage basé sur l'ID du projet
+              return project.id === 'proj-1' ? 65 : 20;
+            }
+            return 0;
+          };
+
+          const progress = getProgress();
+
+          return (
+            <Pressable 
+              key={project.id} 
+              style={styles.projectCard}
+              onPress={() => router.push(`/project/${project.id}`)}
+            >
+              <View style={styles.projectHeader}>
+                <View style={styles.projectInfo}>
+                  <Text style={styles.projectName}>{project.nom}</Text>
+                  <Text style={styles.projectClient}>
+                    {project.client.entreprise || `${project.client.prenom} ${project.client.nom}`}
+                  </Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(project.statut) }]}>
+                  <Text style={styles.statusText}>{getStatusLabel(project.statut)}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.projectDetails}>
+                <View style={styles.projectStat}>
+                  <MaterialIcons name="inventory" size={16} color="#757575" />
+                  <Text style={styles.projectStatText}>{totalProductCount} éléments</Text>
+                </View>
+                <View style={styles.projectStat}>
+                  <MaterialIcons name="euro" size={16} color="#757575" />
+                  <Text style={styles.projectStatText}>
+                    {totalPrice > 0 ? formatPrice(totalPrice) : formatPrice(project.budget?.estime || 0)}
+                  </Text>
+                </View>
+              </View>
+
+              {project.statut === 'en_cours' && (
+                <View style={styles.progressContainer}>
+                  <Text style={styles.progressLabel}>Avancement: {progress}%</Text>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${progress}%` }]} />
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={styles.quickActions}>

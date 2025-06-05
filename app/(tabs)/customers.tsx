@@ -1,8 +1,14 @@
 import React from 'react';
-import { Text, View, ScrollView } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import { router } from 'expo-router';
+import { clients } from '../../data/mockData';
 
 export default function CustomersScreen() {
+  const handleCustomerPress = (customerId: string) => {
+    router.push(`/customer/${customerId}` as any);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -30,38 +36,28 @@ export default function CustomersScreen() {
       <View style={styles.recentSection}>
         <Text style={styles.sectionTitle}>Clients récents</Text>
         
-        <View style={styles.customerCard}>
-          <View style={styles.customerInfo}>
-            <Text style={styles.customerName}>Dupont Constructions</Text>
-            <Text style={styles.customerProject}>Projet: Résidence Les Chênes</Text>
-            <Text style={styles.customerDate}>Dernière activité: il y a 2 jours</Text>
-          </View>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Actif</Text>
-          </View>
-        </View>
-
-        <View style={styles.customerCard}>
-          <View style={styles.customerInfo}>
-            <Text style={styles.customerName}>Martin Rénovation</Text>
-            <Text style={styles.customerProject}>Projet: Maison individuelle</Text>
-            <Text style={styles.customerDate}>Dernière activité: il y a 1 semaine</Text>
-          </View>
-          <View style={[styles.statusBadge, styles.statusPending]}>
-            <Text style={styles.statusText}>En attente</Text>
-          </View>
-        </View>
-
-        <View style={styles.customerCard}>
-          <View style={styles.customerInfo}>
-            <Text style={styles.customerName}>Société Habitat Plus</Text>
-            <Text style={styles.customerProject}>Projet: Immeuble centre-ville</Text>
-            <Text style={styles.customerDate}>Dernière activité: il y a 3 jours</Text>
-          </View>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Actif</Text>
-          </View>
-        </View>
+        {clients.map((client) => (
+          <TouchableOpacity 
+            key={client.id}
+            style={styles.customerCard}
+            onPress={() => handleCustomerPress(client.id)}
+          >
+            <View style={styles.customerInfo}>
+              <Text style={styles.customerName}>
+                {client.entreprise || `${client.prenom} ${client.nom}`}
+              </Text>
+              <Text style={styles.customerProject}>
+                {client.projets.length} projet{client.projets.length > 1 ? 's' : ''} associé{client.projets.length > 1 ? 's' : ''}
+              </Text>
+              <Text style={styles.customerDate}>
+                Dernière activité: {client.updatedAt.toLocaleDateString('fr-FR')}
+              </Text>
+            </View>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>Actif</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
     </ScrollView>
   );
