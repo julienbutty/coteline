@@ -49,7 +49,6 @@ export const products: Product[] = [
       hauteurMin: 500,
       hauteurMax: 2200
     },
-    prixUnitaire: 450,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15')
   },
@@ -71,7 +70,6 @@ export const products: Product[] = [
       hauteurMin: 600,
       hauteurMax: 2500
     },
-    prixUnitaire: 680,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15')
   },
@@ -93,7 +91,6 @@ export const products: Product[] = [
       hauteurMin: 2000,
       hauteurMax: 2200
     },
-    prixUnitaire: 1200,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15')
   },
@@ -115,7 +112,6 @@ export const products: Product[] = [
       hauteurMin: 1500,
       hauteurMax: 2000
     },
-    prixUnitaire: 2800,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15')
   }
@@ -195,10 +191,6 @@ export const projects: Project[] = [
     },
     dateDebutPrevue: new Date('2024-09-01'),
     dateFinPrevue: new Date('2024-12-15'),
-    budget: {
-      estime: 45250,
-      reel: 42800
-    },
     notes: 'Chantier en cours. Attention aux contraintes de copropriété.',
     tags: ['rénovation', 'collectif', 'urgent'],
     createdAt: new Date('2024-06-15'),
@@ -220,10 +212,7 @@ export const projects: Project[] = [
     },
     dateDebutPrevue: new Date('2024-12-01'),
     dateFinPrevue: new Date('2025-01-31'),
-    budget: {
-      estime: 28900
-    },
-    notes: 'Devis en attente de validation client.',
+    notes: 'Mesures à finaliser avant production.',
     tags: ['individuel', 'rénovation'],
     createdAt: new Date('2024-10-05'),
     updatedAt: new Date('2024-11-18')
@@ -236,11 +225,7 @@ export const projects: Project[] = [
     client: clients[0],
     produits: [],
     statut: 'termine',
-    budget: {
-      estime: 12500,
-      reel: 13200
-    },
-    notes: 'Projet terminé avec satisfaction client.',
+    notes: 'Projet terminé, toutes les mesures validées.',
     tags: ['extension', 'neuf'],
     createdAt: new Date('2024-03-10'),
     updatedAt: new Date('2024-05-20')
@@ -261,11 +246,7 @@ export const projects: Project[] = [
     },
     dateDebutPrevue: new Date('2024-10-01'),
     dateFinPrevue: new Date('2025-03-31'),
-    budget: {
-      estime: 185600,
-      reel: 162000
-    },
-    notes: 'Gros chantier en cours. Livraisons échelonnées.',
+    notes: 'Gros chantier en cours. Mesures par phases.',
     tags: ['neuf', 'collectif', 'aluminium'],
     createdAt: new Date('2024-07-01'),
     updatedAt: new Date('2024-11-15')
@@ -292,7 +273,6 @@ export const projectProducts: ProjectProduct[] = [
       ouverture: 'Oscillo-battant'
     },
     notes: 'Fenêtres salon - étage',
-    prixUnitaire: 450,
     statut: 'valide',
     createdAt: new Date('2024-06-20'),
     updatedAt: new Date('2024-09-15')

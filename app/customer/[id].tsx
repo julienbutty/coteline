@@ -109,9 +109,9 @@ export default function CustomerDetailScreen() {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {clientProjects.reduce((total, p) => total + (p.budget?.reel || p.budget?.estime || 0), 0).toLocaleString('fr-FR')}€
+            {clientProjects.filter(p => p.statut === 'brouillon').length}
           </Text>
-          <Text style={styles.statLabel}>CA total</Text>
+          <Text style={styles.statLabel}>Brouillons</Text>
         </View>
       </View>
 
@@ -220,11 +220,11 @@ export default function CustomerDetailScreen() {
                 </View>
                 <Text style={styles.projectDescription}>{project.description}</Text>
                 <View style={styles.projectMeta}>
-                  <Text style={styles.projectBudget}>
-                    Budget: {(project.budget?.reel || project.budget?.estime || 0).toLocaleString('fr-FR')}€
-                  </Text>
                   <Text style={styles.projectDate}>
                     Créé le {project.createdAt.toLocaleDateString('fr-FR')}
+                  </Text>
+                  <Text style={styles.projectDate}>
+                    Modifié le {project.updatedAt.toLocaleDateString('fr-FR')}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -462,11 +462,6 @@ const styles = StyleSheet.create((theme) => ({
   projectMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  projectBudget: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.medium,
   },
   projectDate: {
     fontSize: theme.typography.fontSize.xs,

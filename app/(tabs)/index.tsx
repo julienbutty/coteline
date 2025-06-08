@@ -62,19 +62,8 @@ export default function ProjectsScreen() {
             }
           };
 
-          const formatPrice = (price: number) => {
-            return new Intl.NumberFormat('fr-FR', {
-              style: 'currency',
-              currency: 'EUR'
-            }).format(price);
-          };
-
           const totalProductCount = project.produits.reduce((total, produit) => {
             return total + produit.quantite;
-          }, 0);
-
-          const totalPrice = project.produits.reduce((total, produit) => {
-            return total + (produit.prixUnitaire || 0) * produit.quantite;
           }, 0);
 
           // Calcul du pourcentage d'avancement (simulé)
@@ -114,9 +103,9 @@ export default function ProjectsScreen() {
                   <Text style={styles.projectStatText}>{totalProductCount} éléments</Text>
                 </View>
                 <View style={styles.projectStat}>
-                  <MaterialIcons name="euro" size={16} color="#757575" />
+                  <MaterialIcons name="schedule" size={16} color="#757575" />
                   <Text style={styles.projectStatText}>
-                    {totalPrice > 0 ? formatPrice(totalPrice) : formatPrice(project.budget?.estime || 0)}
+                    Créé le {project.createdAt.toLocaleDateString('fr-FR')}
                   </Text>
                 </View>
               </View>

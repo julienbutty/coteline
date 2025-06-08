@@ -134,24 +134,22 @@ export default function ProductDetailScreen() {
       </View>
 
       <View style={styles.calculatorCard}>
-        <Text style={styles.calculatorTitle}>Calculateur de prix</Text>
-        <Text style={styles.calculatorSubtitle}>Prix de base: {product.prixUnitaire}€ HT/unité</Text>
+        <Text style={styles.calculatorTitle}>Informations techniques</Text>
+        <Text style={styles.calculatorSubtitle}>Référence produit: {product.id}</Text>
         
         <View style={styles.calculatorRow}>
-          <Text style={styles.calculatorLabel}>Quantité</Text>
-          <View style={styles.quantityControls}>
-            <TouchableOpacity style={styles.quantityButton}>
-              <Ionicons name="remove" size={20} color="#2F22CF" />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>1</Text>
-            <TouchableOpacity style={styles.quantityButton}>
-              <Ionicons name="add" size={20} color="#2F22CF" />
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.calculatorLabel}>Type:</Text>
+          <Text style={styles.quantityText}>{product.type}</Text>
         </View>
 
-        <View style={styles.priceTotal}>
-          <Text style={styles.priceTotalText}>Total: {product.prixUnitaire}€ HT</Text>
+        <View style={styles.calculatorRow}>
+          <Text style={styles.calculatorLabel}>Créé le:</Text>
+          <Text style={styles.quantityText}>{product.createdAt.toLocaleDateString('fr-FR')}</Text>
+        </View>
+
+        <View style={styles.calculatorRow}>
+          <Text style={styles.calculatorLabel}>Modifié le:</Text>
+          <Text style={styles.quantityText}>{product.updatedAt.toLocaleDateString('fr-FR')}</Text>
         </View>
       </View>
     </View>
@@ -255,12 +253,8 @@ export default function ProductDetailScreen() {
         </View>
       </View>
 
-      {/* Prix et actions */}
+      {/* Actions */}
       <View style={styles.priceSection}>
-        <View style={styles.priceInfo}>
-          <Text style={styles.priceText}>{product.prixUnitaire}€</Text>
-          <Text style={styles.priceLabel}>HT / unité</Text>
-        </View>
         <TouchableOpacity style={styles.addButton} onPress={handleAddToProject}>
           <Ionicons name="add" size={20} color="#FFFFFF" />
           <Text style={styles.addButtonText}>Ajouter à un projet</Text>
@@ -356,24 +350,12 @@ const styles = StyleSheet.create((theme) => ({
   },
   priceSection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: theme.spacing.lg,
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-  },
-  priceInfo: {
-    alignItems: 'flex-start',
-  },
-  priceText: {
-    fontSize: theme.typography.fontSize.xxl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary,
-  },
-  priceLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
   },
   addButton: {
     flexDirection: 'row',
@@ -533,19 +515,7 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.md,
     color: theme.colors.text,
   },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-  },
-  quantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: theme.radius.sm,
-    backgroundColor: 'rgba(47, 34, 207, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
   quantityText: {
     fontSize: theme.typography.fontSize.md,
     fontWeight: theme.typography.fontWeight.semibold,
@@ -553,17 +523,7 @@ const styles = StyleSheet.create((theme) => ({
     minWidth: 30,
     textAlign: 'center',
   },
-  priceTotal: {
-    alignItems: 'center',
-    paddingTop: theme.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  priceTotalText: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary,
-  },
+
   projectsTitle: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.semibold,

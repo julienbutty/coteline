@@ -79,29 +79,30 @@ export default function ProductsScreen() {
 
       {/* Liste des produits */}
       <View style={styles.productsContainer}>
-        {filteredProducts.map((product) => (
-          <TouchableOpacity 
-            key={product.id}
-            style={styles.productCard}
-            onPress={() => handleProductPress(product.id)}
-          >
-            <View style={styles.productHeader}>
-              <View style={styles.productIcon}>
-                <Ionicons 
-                  name={getProductIcon(product.type) as any} 
-                  size={24} 
-                  color="#2F22CF" 
-                />
+        {filteredProducts.map((product) => {
+          const category = productCategories.find(c => c.id === product.categoryId);
+          return (
+            <TouchableOpacity 
+              key={product.id}
+              style={styles.productCard}
+              onPress={() => handleProductPress(product.id)}
+            >
+              <View style={styles.productHeader}>
+                <View style={styles.productIcon}>
+                  <Ionicons 
+                    name={getProductIcon(product.type) as any} 
+                    size={24} 
+                    color="#2F22CF" 
+                  />
+                </View>
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName}>{product.nom}</Text>
+                  <Text style={styles.productDescription}>{product.description}</Text>
+                </View>
+                <View style={styles.productCategory}>
+                  <Text style={styles.productType}>{category?.nom}</Text>
+                </View>
               </View>
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{product.nom}</Text>
-                <Text style={styles.productDescription}>{product.description}</Text>
-              </View>
-              <View style={styles.productPrice}>
-                <Text style={styles.priceText}>{product.prixUnitaire}€</Text>
-                <Text style={styles.priceLabel}>HT/unité</Text>
-              </View>
-            </View>
 
             <View style={styles.productSpecs}>
               <View style={styles.specItem}>
@@ -130,7 +131,8 @@ export default function ProductsScreen() {
               <Ionicons name="chevron-forward" size={20} color="#666" />
             </View>
           </TouchableOpacity>
-        ))}
+          );
+        })}
       </View>
 
       {filteredProducts.length === 0 && (
@@ -237,18 +239,15 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textSecondary,
     lineHeight: theme.typography.lineHeight.sm,
   },
-  productPrice: {
+  productCategory: {
     alignItems: 'flex-end',
   },
-  priceText: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
+  productType: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
     color: theme.colors.primary,
   },
-  priceLabel: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.textTertiary,
-  },
+
   productSpecs: {
     marginBottom: theme.spacing.md,
     gap: theme.spacing.sm,

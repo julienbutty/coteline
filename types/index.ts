@@ -55,7 +55,6 @@ export interface Product {
     hauteurMin: number;
     hauteurMax: number;
   };
-  prixUnitaire?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,7 +78,6 @@ export interface ProjectProduct {
     options?: string[];
   };
   notes?: string;
-  prixUnitaire?: number;
   statut: 'brouillon' | 'valide' | 'commande';
   createdAt: Date;
   updatedAt: Date;
@@ -101,10 +99,6 @@ export interface Project {
   };
   dateDebutPrevue?: Date;
   dateFinPrevue?: Date;
-  budget?: {
-    estime: number;
-    reel?: number;
-  };
   notes?: string;
   tags?: string[];
   createdAt: Date;

@@ -52,16 +52,7 @@ export default function ProjectDetailScreen() {
     });
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(price);
-  };
 
-  const totalProjectPrice = project.produits.reduce((total, produit) => {
-    return total + (produit.prixUnitaire || 0) * produit.quantite;
-  }, 0);
 
   return (
     <ScrollView style={styles.container}>
@@ -173,39 +164,7 @@ export default function ProjectDetailScreen() {
         </View>
       )}
 
-      {/* Budget */}
-      {project.budget && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="euro" size={24} color="#FF6B35" />
-            <Text style={styles.sectionTitle}>Budget</Text>
-          </View>
-          
-          <View style={styles.budgetCard}>
-            <View style={styles.budgetRow}>
-              <Text style={styles.budgetLabel}>Budget estimé :</Text>
-              <Text style={styles.budgetValue}>{formatPrice(project.budget.estime)}</Text>
-            </View>
-            
-            {project.budget.reel && (
-              <View style={styles.budgetRow}>
-                <Text style={styles.budgetLabel}>Coût réel :</Text>
-                <Text style={[
-                  styles.budgetValue,
-                  { color: project.budget.reel > project.budget.estime ? '#F44336' : '#4CAF50' }
-                ]}>
-                  {formatPrice(project.budget.reel)}
-                </Text>
-              </View>
-            )}
 
-            <View style={styles.budgetRow}>
-              <Text style={styles.budgetLabel}>Total produits :</Text>
-              <Text style={styles.budgetValue}>{formatPrice(totalProjectPrice)}</Text>
-            </View>
-          </View>
-        </View>
-      )}
 
       {/* Liste des produits */}
       <View style={styles.section}>
@@ -260,14 +219,12 @@ export default function ProjectDetailScreen() {
                   </Text>
                 </View>
 
-                {produit.prixUnitaire && (
-                  <View style={styles.productDetailRow}>
-                    <MaterialIcons name="euro" size={16} color="#757575" />
-                    <Text style={styles.productDetailText}>
-                      {formatPrice(produit.prixUnitaire)} × {produit.quantite} = {formatPrice(produit.prixUnitaire * produit.quantite)}
-                    </Text>
-                  </View>
-                )}
+                <View style={styles.productDetailRow}>
+                  <MaterialIcons name="schedule" size={16} color="#757575" />
+                  <Text style={styles.productDetailText}>
+                    Créé le {produit.createdAt.toLocaleDateString('fr-FR')}
+                  </Text>
+                </View>
               </View>
 
               {produit.notes && (
@@ -275,6 +232,21 @@ export default function ProjectDetailScreen() {
                   <Text style={styles.productNotesText}>📝 {produit.notes}</Text>
                 </View>
               )}
+              
+              {/* Actions produit */}
+              <View style={styles.productActions}>
+                <Pressable 
+                  style={styles.measureButton}
+                  onPress={() => router.push(`/measure/${produit.id}`)}
+                >
+                  <MaterialIcons name="straighten" size={18} color="#FF6B35" />
+                  <Text style={styles.measureButtonText}>Prendre mesures</Text>
+                </Pressable>
+                
+                <Pressable style={styles.editProductButton}>
+                  <MaterialIcons name="edit" size={18} color="#757575" />
+                </Pressable>
+              </View>
             </View>
           ))
         )}
@@ -565,6 +537,36 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textSecondary,
     fontStyle: 'italic',
+  },
+  productActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.md,
+    gap: theme.spacing.sm,
+  },
+  measureButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primaryLight,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radius.md,
+    gap: theme.spacing.xs,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  measureButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: '#FF6B35',
+  },
+  editProductButton: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   notesCard: {
     backgroundColor: theme.colors.surfaceVariant,
