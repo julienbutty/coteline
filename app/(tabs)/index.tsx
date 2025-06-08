@@ -3,12 +3,14 @@ import { Text, View, ScrollView, Pressable } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { projects } from '../../data/mockData';
 
 export default function ProjectsScreen() {
+  const insets = useSafeAreaInsets();
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Mes Projets</Text>
         <Text style={styles.subtitle}>Gestion de vos chantiers menuiserie</Text>
       </View>

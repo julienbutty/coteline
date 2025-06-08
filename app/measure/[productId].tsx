@@ -3,6 +3,8 @@ import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MeasurementPicker from '../../components/MeasurementPicker';
 
 interface Measurement {
@@ -14,6 +16,7 @@ interface Measurement {
 
 export default function MeasureScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
+  const insets = useSafeAreaInsets();
   
   // Exemple de mesures pour une fenêtre - pourrait venir d'une base de données
   const [measurements, setMeasurements] = useState<Measurement[]>([
@@ -44,6 +47,8 @@ export default function MeasureScreen() {
 
   const handleSave = () => {
     if (!isComplete) {
+      // Feedback haptique pour erreur
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert(
         'Mesures incomplètes',
         'Veuillez renseigner toutes les mesures obligatoires avant de sauvegarder.',
@@ -52,6 +57,9 @@ export default function MeasureScreen() {
       return;
     }
 
+    // Feedback haptique pour succès
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    
     // Ici on sauvegarderait les mesures
     Alert.alert(
       'Mesures sauvegardées',
@@ -79,9 +87,16 @@ export default function MeasureScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <View style={styles.headerTop}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Pressable 
+            style={styles.backButton} 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              router.back();
+            }}
+            hitSlop={8}
+          >
             <MaterialIcons name="arrow-back" size={24} color="#FF6B35" />
           </Pressable>
           <Text style={styles.headerTitle}>Prise de mesures</Text>
@@ -170,17 +185,29 @@ export default function MeasureScreen() {
           </View>
           
           <View style={styles.quickActions}>
-            <Pressable style={styles.quickActionButton}>
+            <Pressable 
+              style={styles.quickActionButton}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              hitSlop={4}
+            >
               <MaterialIcons name="photo-camera" size={24} color="#FF6B35" />
               <Text style={styles.quickActionText}>Photo</Text>
             </Pressable>
             
-            <Pressable style={styles.quickActionButton}>
+            <Pressable 
+              style={styles.quickActionButton}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              hitSlop={4}
+            >
               <MaterialIcons name="mic" size={24} color="#FF6B35" />
               <Text style={styles.quickActionText}>Vocal</Text>
             </Pressable>
             
-            <Pressable style={styles.quickActionButton}>
+            <Pressable 
+              style={styles.quickActionButton}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              hitSlop={4}
+            >
               <MaterialIcons name="note-add" size={24} color="#FF6B35" />
               <Text style={styles.quickActionText}>Note</Text>
             </Pressable>
@@ -224,7 +251,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   
   header: {
-    paddingTop: 60, // Pour la status bar
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: theme.colors.surface,
@@ -240,9 +266,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48, // Augmenté de 40 à 48px pour meilleure surface tactile
+    height: 48,
+    borderRadius: 24,
     backgroundColor: theme.colors.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -334,9 +360,10 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.surface,
     borderRadius: 12,
-    padding: 16,
+    padding: 20, // Augmenté de 16 à 20px pour meilleure surface tactile
     alignItems: 'center',
     gap: 8,
+    minHeight: 80, // Hauteur minimale pour surface tactile confortable
   },
   
   quickActionText: {
@@ -362,10 +389,11 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
     backgroundColor: theme.colors.surface,
     borderRadius: 16,
-    padding: 18,
+    padding: 20, // Augmenté de 18 à 20px pour meilleure surface tactile
     gap: 12,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    minHeight: 64, // Hauteur minimale recommandée pour les boutons principaux
   },
   
   saveButtonActive: {

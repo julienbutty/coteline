@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, Dimensions } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
 
 interface MeasurementPickerProps {
   label: string;
@@ -37,13 +38,23 @@ export default function MeasurementPicker({
   };
 
   const handleConfirm = () => {
+    // Feedback haptique pour validation
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onValueChange(tempValue);
     setIsModalVisible(false);
   };
 
   const handleCancel = () => {
+    // Feedback haptique pour annulation
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setTempValue(value || 0);
     setIsModalVisible(false);
+  };
+
+  const handleOpenModal = () => {
+    // Feedback haptique pour ouverture
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsModalVisible(true);
   };
 
   const WheelPicker = ({ 
@@ -73,7 +84,12 @@ export default function MeasurementPicker({
                 styles.wheelItem,
                 selectedValue === val && styles.selectedWheelItem
               ]}
-              onPress={() => onValueChange(val)}
+              onPress={() => {
+                // Feedback haptique pour sélection
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onValueChange(val);
+              }}
+              hitSlop={8} // Zone de touch étendue
             >
               <Text style={[
                 styles.wheelItemText,
@@ -88,7 +104,7 @@ export default function MeasurementPicker({
         {/* Indicateur de sélection */}
         <View style={styles.selectionIndicator} pointerEvents="none">
           <View style={styles.selectionLine} />
-          <View style={[styles.selectionLine, { top: styles.wheelItem.height }]} />
+          <View style={styles.selectionLineBottom} />
         </View>
       </View>
     );
@@ -100,7 +116,8 @@ export default function MeasurementPicker({
       
       <Pressable 
         style={styles.inputButton}
-        onPress={() => setIsModalVisible(true)}
+        onPress={handleOpenModal}
+        hitSlop={4} // Zone de touch étendue
       >
         <Text style={[
           styles.inputText,
@@ -121,11 +138,19 @@ export default function MeasurementPicker({
           <View style={styles.modalContent}>
             {/* Header */}
             <View style={styles.modalHeader}>
-              <Pressable onPress={handleCancel}>
+              <Pressable 
+                style={styles.headerButton}
+                onPress={handleCancel}
+                hitSlop={8}
+              >
                 <Text style={styles.cancelButton}>Annuler</Text>
               </Pressable>
               <Text style={styles.modalTitle}>{label}</Text>
-              <Pressable onPress={handleConfirm}>
+              <Pressable 
+                style={styles.headerButton}
+                onPress={handleConfirm}
+                hitSlop={8}
+              >
                 <Text style={styles.confirmButton}>OK</Text>
               </Pressable>
             </View>
@@ -173,8 +198,8 @@ const styles = StyleSheet.create((theme) => ({
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: 12,
-    padding: 16,
-    minHeight: 56,
+    padding: 18, // Augmenté pour meilleure surface tactile
+    minHeight: 64, // Augmenté de 56 à 64px (Apple recommande 44px minimum)
   },
   
   inputText: {
@@ -241,9 +266,19 @@ const styles = StyleSheet.create((theme) => ({
   },
   
   wheelItem: {
-    height: 44,
+    height: 54, // Augmenté de 44 à 54px pour meilleure surface tactile
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12, // Zone tactile étendue
+  },
+  
+  headerButton: {
+    minHeight: 44, // Taille minimale recommandée Apple
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   
   wheelItemText: {
@@ -267,8 +302,8 @@ const styles = StyleSheet.create((theme) => ({
     left: 0,
     right: 0,
     top: '50%',
-    height: 44,
-    marginTop: -22,
+    height: 54, // Ajusté pour correspondre à la nouvelle hauteur wheelItem
+    marginTop: -27, // Ajusté pour centrer
     pointerEvents: 'none',
   },
   
@@ -279,6 +314,15 @@ const styles = StyleSheet.create((theme) => ({
     height: 1,
     backgroundColor: theme.colors.border,
     top: 0,
+  },
+  
+  selectionLineBottom: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    height: 1,
+    backgroundColor: theme.colors.border,
+    bottom: 0,
   },
   
   previewContainer: {

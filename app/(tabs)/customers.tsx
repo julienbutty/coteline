@@ -2,16 +2,19 @@ import React from 'react';
 import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { clients } from '../../data/mockData';
 
 export default function CustomersScreen() {
+  const insets = useSafeAreaInsets();
+  
   const handleCustomerPress = (customerId: string) => {
     router.push(`/customer/${customerId}` as any);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Gestion Clients</Text>
         <Text style={styles.subtitle}>Contacts et projets associés</Text>
       </View>

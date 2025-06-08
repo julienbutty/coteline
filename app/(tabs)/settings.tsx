@@ -2,9 +2,11 @@ import React from 'react';
 import { Text, View, ScrollView, Switch } from 'react-native';
 import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { useUnistyles } from 'react-native-unistyles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
   const { theme } = useUnistyles();
+  const insets = useSafeAreaInsets();
   const [darkMode, setDarkMode] = React.useState(UnistylesRuntime.themeName === 'dark');
 
   const toggleTheme = () => {
@@ -15,7 +17,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Réglages</Text>
         <Text style={styles.subtitle}>Personnalisation et préférences</Text>
       </View>

@@ -3,10 +3,12 @@ import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { products, productCategories } from '../../data/mockData';
 
 export default function ProductsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   const filteredProducts = selectedCategory 
     ? products.filter(p => p.categoryId === selectedCategory)
@@ -38,7 +40,7 @@ export default function ProductsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Catalogue Produits</Text>
         <Text style={styles.subtitle}>
           {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} disponible{filteredProducts.length > 1 ? 's' : ''}

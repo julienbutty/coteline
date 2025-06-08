@@ -28,33 +28,13 @@ export default function TabLayout() {
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
         },
-        headerStyle: {
-          backgroundColor: theme.colors.surface,
-        },
-        headerTintColor: theme.colors.text,
-        headerTitleStyle: {
-          fontWeight: theme.typography.fontWeight.semibold,
-        },
+        headerShown: false, // Supprime tous les headers des tabs
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Projets',
           tabBarIcon: ({ color }) => <TabBarIcon name="folder" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <MaterialIcons
-                    name="add"
-                    size={28}
-                    color={theme.colors.primary}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
         }}
       />
       <Tabs.Screen
