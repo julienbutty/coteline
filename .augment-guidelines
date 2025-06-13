@@ -1,0 +1,79 @@
+# .augment-guidelines
+---
+context:
+  application:
+    description: |
+      Application mobile pour artisans menuisiers - Prise de mesures techniques
+    features_principales:
+      - Création de projets (chantiers clients)
+      - Catalogue produits (fenêtres/portails/portes) avec paramètres métier
+      - Fiche client + assignation projets - Consultation listes (projets/clients/produits) avec override paramètres
+    evolutions_futures:
+      - Génération devis/commandes fournisseurs
+      - Liste d'achat chantier
+      - Workspaces collaboratifs
+      - Analyse PDF de commandes
+
+regles_globales:
+  accessibilite:
+    - Contraste AA minimum
+    - Labels lisible par VoiceOver
+    - Navigation au clavier
+  i18n:
+    - Langue principale: français
+    - Structure compatible traduction
+  securite:
+    - Chiffrement données sensibles
+    - Aucun secret dans le client
+  tests:
+    - Couverture critique: 80%
+    - Tests E2E des flux utilisateur
+
+regles_techniques:
+  archi:
+    - Clean Architecture (core/application/infra)
+    - Isolation Supabase via service dédié
+    - Pas d'imports transversaux
+  code_style:
+    - Composants fonctionnels + hooks
+    - React.memo() pour composants statiques
+    - FlatLists optimisées avec FlashList
+    - StyleSheet.create() pour styles
+  typescript:
+    - Strict type checking
+    - Zod pour validation runtime
+    - Pas de 'any'
+  performance:
+    - Hermes Engine activé
+    - Optimisation images react-native-fast-image
+    - WatermelonDB pour offline
+  supabase:
+    - Wrapper TypeScript pour appels API
+    - Fallback local
+    - Génération types via CLI
+  package:
+    - Bun
+    - expo
+
+conventions:
+  nommage:
+    variables: camelCase
+    composants: PascalCase
+    dossiers: kebab-case
+structure_projet:
+  - Feature-based architecture
+  - Isolation navigation
+  - Services dans /src/services
+
+anti_patterns:
+  - Éviter useEffect superflu
+  - Pas de logique métier dans les composants
+  - Interdire les anonymous functions dans render
+
+dependencies:
+  - privilégier react-native-community
+  - éviter les libs natives non testées
+  - lock versions majeures
+
+---
+
