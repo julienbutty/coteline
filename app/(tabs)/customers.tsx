@@ -1,10 +1,13 @@
 import React from "react";
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useClients } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
+import { Header } from "../../components/Header";
+import { SafeScrollView } from "../../components/SafeScrollView";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CustomersScreen() {
   const insets = useSafeAreaInsets();
@@ -15,80 +18,79 @@ export default function CustomersScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.title}>Gestion Clients</Text>
-        <Text style={styles.subtitle}>Contacts et projets associés</Text>
-      </View>
+    <>
+      <Header title="Gestion Clients" subtitle="Contacts et projets associés" />
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{clients.length}</Text>
-          <Text style={styles.statLabel}>Clients actifs</Text>
+      <SafeScrollView style={styles.container}>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{clients.length}</Text>
+            <Text style={styles.statLabel}>Clients actifs</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {clients.reduce(
+                (total, client) => total + client.projets.length,
+                0
+              )}
+            </Text>
+            <Text style={styles.statLabel}>Projets associés</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {
+                clients.filter(
+                  (client) =>
+                    client.updatedAt >
+                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                ).length
+              }
+            </Text>
+            <Text style={styles.statLabel}>Activité récente</Text>
+          </View>
         </View>
 
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {clients.reduce(
-              (total, client) => total + client.projets.length,
-              0
-            )}
-          </Text>
-          <Text style={styles.statLabel}>Projets associés</Text>
+        <View style={styles.recentSection}>
+          <Text style={styles.sectionTitle}>Clients récents</Text>
+
+          <LoadingState
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+            isEmpty={clients.length === 0}
+            emptyMessage="Aucun client trouvé"
+          >
+            {clients.map((client) => (
+              <TouchableOpacity
+                key={client.id}
+                style={styles.customerCard}
+                onPress={() => handleCustomerPress(client.id)}
+              >
+                <View style={styles.customerInfo}>
+                  <Text style={styles.customerName}>
+                    {client.entreprise || `${client.prenom} ${client.nom}`}
+                  </Text>
+                  <Text style={styles.customerProject}>
+                    {client.projets.length} projet
+                    {client.projets.length > 1 ? "s" : ""} associé
+                    {client.projets.length > 1 ? "s" : ""}
+                  </Text>
+                  <Text style={styles.customerDate}>
+                    Dernière activité:{" "}
+                    {client.updatedAt.toLocaleDateString("fr-FR")}
+                  </Text>
+                </View>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>Actif</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </LoadingState>
         </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {
-              clients.filter(
-                (client) =>
-                  client.updatedAt >
-                  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-              ).length
-            }
-          </Text>
-          <Text style={styles.statLabel}>Activité récente</Text>
-        </View>
-      </View>
-
-      <View style={styles.recentSection}>
-        <Text style={styles.sectionTitle}>Clients récents</Text>
-
-        <LoadingState
-          loading={loading}
-          error={error}
-          onRetry={refetch}
-          isEmpty={clients.length === 0}
-          emptyMessage="Aucun client trouvé"
-        >
-          {clients.map((client) => (
-            <TouchableOpacity
-              key={client.id}
-              style={styles.customerCard}
-              onPress={() => handleCustomerPress(client.id)}
-            >
-              <View style={styles.customerInfo}>
-                <Text style={styles.customerName}>
-                  {client.entreprise || `${client.prenom} ${client.nom}`}
-                </Text>
-                <Text style={styles.customerProject}>
-                  {client.projets.length} projet
-                  {client.projets.length > 1 ? "s" : ""} associé
-                  {client.projets.length > 1 ? "s" : ""}
-                </Text>
-                <Text style={styles.customerDate}>
-                  Dernière activité:{" "}
-                  {client.updatedAt.toLocaleDateString("fr-FR")}
-                </Text>
-              </View>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>Actif</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </LoadingState>
-      </View>
-    </ScrollView>
+      </SafeScrollView>
+    </>
   );
 }
 

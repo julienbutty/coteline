@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { Header } from "../../components/Header";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +11,7 @@ import { LoadingState } from "../../components/LoadingState";
 export default function ProductsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const { theme } = useUnistyles();
 
   const {
     data: products,
@@ -30,6 +32,33 @@ export default function ProductsScreen() {
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}` as any);
+  };
+
+  // Fonction pour générer le sous-titre dynamique
+  const getHeaderSubtitle = () => {
+    const count = filteredProducts.length;
+    const productText = `${count} produit${count > 1 ? "s" : ""}`;
+    const availableText = `disponible${count > 1 ? "s" : ""}`;
+
+    if (selectedCategory) {
+      const categoryName =
+        productCategories.find((c) => c.id === selectedCategory)?.nom ||
+        "Catégorie";
+      return `${productText} ${availableText} • ${categoryName}`;
+    }
+
+    return `${productText} ${availableText}`;
+  };
+
+  // Fonction pour générer le titre dynamique
+  const getHeaderTitle = () => {
+    if (selectedCategory) {
+      const categoryName = productCategories.find(
+        (c) => c.id === selectedCategory
+      )?.nom;
+      return categoryName ? `${categoryName}` : "Catalogue Produits";
+    }
+    return "Catalogue Produits";
   };
 
   const getCategoryIcon = (categoryName: string) => {
@@ -63,148 +92,148 @@ export default function ProductsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.title}>Catalogue Produits</Text>
-        <Text style={styles.subtitle}>
-          {filteredProducts.length} produit
-          {filteredProducts.length > 1 ? "s" : ""} disponible
-          {filteredProducts.length > 1 ? "s" : ""}
-        </Text>
-      </View>
+    <>
+      <Header title={getHeaderTitle()} subtitle={getHeaderSubtitle()} />
 
       {/* Filtres par catégorie */}
-      <LoadingState
-        loading={categoriesLoading}
-        error={categoriesError}
-        onRetry={refetchCategories}
-        isEmpty={productCategories.length === 0}
-        emptyMessage="Aucune catégorie disponible"
-      >
-        <View style={styles.filtersContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.filterChip,
-                !selectedCategory && styles.filterChipActive,
-              ]}
-              onPress={() => setSelectedCategory(null)}
-            >
-              <Text
-                style={[
-                  styles.filterText,
-                  !selectedCategory && styles.filterTextActive,
-                ]}
-              >
-                Tous
-              </Text>
-            </TouchableOpacity>
-
-            {productCategories.map((category) => (
+      <ScrollView style={styles.container}>
+        <LoadingState
+          loading={categoriesLoading}
+          error={categoriesError}
+          onRetry={refetchCategories}
+          isEmpty={productCategories.length === 0}
+          emptyMessage="Aucune catégorie disponible"
+        >
+          <View style={styles.filtersContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <TouchableOpacity
-                key={category.id}
                 style={[
                   styles.filterChip,
-                  selectedCategory === category.id && styles.filterChipActive,
+                  !selectedCategory && styles.filterChipActive,
                 ]}
-                onPress={() => setSelectedCategory(category.id)}
+                onPress={() => setSelectedCategory(null)}
               >
-                <Ionicons
-                  name={getCategoryIcon(category.nom) as any}
-                  size={16}
-                  color={selectedCategory === category.id ? "#FFFFFF" : "#666"}
-                  style={styles.filterIcon}
-                />
                 <Text
                   style={[
                     styles.filterText,
-                    selectedCategory === category.id && styles.filterTextActive,
+                    !selectedCategory && styles.filterTextActive,
                   ]}
                 >
-                  {category.nom}
+                  Tous
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </LoadingState>
 
-      {/* Liste des produits */}
-      <LoadingState
-        loading={productsLoading}
-        error={productsError}
-        onRetry={refetchProducts}
-        isEmpty={filteredProducts.length === 0}
-        emptyMessage="Aucun produit trouvé"
-      >
-        <View style={styles.productsContainer}>
-          {filteredProducts.map((product) => {
-            const category = productCategories.find(
-              (c) => c.id === product.categoryId
-            );
-            return (
-              <TouchableOpacity
-                key={product.id}
-                style={styles.productCard}
-                onPress={() => handleProductPress(product.id)}
-              >
-                <View style={styles.productHeader}>
-                  <View style={styles.productIcon}>
-                    <Ionicons
-                      name={getProductIcon(product.type) as any}
-                      size={24}
-                      color="#2F22CF"
-                    />
-                  </View>
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productName}>{product.nom}</Text>
-                    <Text style={styles.productDescription}>
-                      {product.description}
-                    </Text>
-                  </View>
-                  <View style={styles.productCategory}>
-                    <Text style={styles.productType}>{category?.nom}</Text>
-                  </View>
-                </View>
+              {productCategories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.filterChip,
+                    selectedCategory === category.id && styles.filterChipActive,
+                  ]}
+                  onPress={() => setSelectedCategory(category.id)}
+                >
+                  <Ionicons
+                    name={getCategoryIcon(category.nom) as any}
+                    size={16}
+                    color={
+                      selectedCategory === category.id ? "#FFFFFF" : "#666"
+                    }
+                    style={styles.filterIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.filterText,
+                      selectedCategory === category.id &&
+                        styles.filterTextActive,
+                    ]}
+                  >
+                    {category.nom}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </LoadingState>
 
-                <View style={styles.productSpecs}>
-                  <View style={styles.specItem}>
-                    <Text style={styles.specLabel}>Matériaux:</Text>
-                    <Text style={styles.specValue}>
-                      {product.specifications.materiaux?.slice(0, 2).join(", ")}
-                      {(product.specifications.materiaux?.length || 0) > 2 &&
-                        "..."}
-                    </Text>
+        {/* Liste des produits */}
+        <LoadingState
+          loading={productsLoading}
+          error={productsError}
+          onRetry={refetchProducts}
+          isEmpty={filteredProducts.length === 0}
+          emptyMessage="Aucun produit trouvé"
+        >
+          <View style={styles.productsContainer}>
+            {filteredProducts.map((product) => {
+              const category = productCategories.find(
+                (c) => c.id === product.categoryId
+              );
+              return (
+                <TouchableOpacity
+                  key={product.id}
+                  style={styles.productCard}
+                  onPress={() => handleProductPress(product.id)}
+                >
+                  <View style={styles.productHeader}>
+                    <View style={styles.productIcon}>
+                      <Ionicons
+                        name={getProductIcon(product.type) as any}
+                        size={24}
+                        color="#2F22CF"
+                      />
+                    </View>
+                    <View style={styles.productInfo}>
+                      <Text style={styles.productName}>{product.nom}</Text>
+                      <Text style={styles.productDescription}>
+                        {product.description}
+                      </Text>
+                    </View>
+                    <View style={styles.productCategory}>
+                      <Text style={styles.productType}>{category?.nom}</Text>
+                    </View>
                   </View>
-                  <View style={styles.specItem}>
-                    <Text style={styles.specLabel}>Dimensions:</Text>
-                    <Text style={styles.specValue}>
-                      {product.dimensionsParDefaut.largeurMin}-
-                      {product.dimensionsParDefaut.largeurMax} ×{" "}
-                      {product.dimensionsParDefaut.hauteurMin}-
-                      {product.dimensionsParDefaut.hauteurMax}mm
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={styles.productFooter}>
-                  <View style={styles.productTags}>
-                    {product.specifications.couleurs
-                      ?.slice(0, 3)
-                      .map((color, index) => (
-                        <View key={index} style={styles.colorTag}>
-                          <Text style={styles.colorText}>{color}</Text>
-                        </View>
-                      ))}
+                  <View style={styles.productSpecs}>
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>Matériaux:</Text>
+                      <Text style={styles.specValue}>
+                        {product.specifications.materiaux
+                          ?.slice(0, 2)
+                          .join(", ")}
+                        {(product.specifications.materiaux?.length || 0) > 2 &&
+                          "..."}
+                      </Text>
+                    </View>
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>Dimensions:</Text>
+                      <Text style={styles.specValue}>
+                        {product.dimensionsParDefaut.largeurMin}-
+                        {product.dimensionsParDefaut.largeurMax} ×{" "}
+                        {product.dimensionsParDefaut.hauteurMin}-
+                        {product.dimensionsParDefaut.hauteurMax}mm
+                      </Text>
+                    </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </LoadingState>
-    </ScrollView>
+
+                  <View style={styles.productFooter}>
+                    <View style={styles.productTags}>
+                      {product.specifications.couleurs
+                        ?.slice(0, 3)
+                        .map((color, index) => (
+                          <View key={index} style={styles.colorTag}>
+                            <Text style={styles.colorText}>{color}</Text>
+                          </View>
+                        ))}
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </LoadingState>
+      </ScrollView>
+    </>
   );
 }
 
@@ -362,5 +391,29 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textTertiary,
     textAlign: "center",
+  },
+  headerStats: {
+    backgroundColor: theme.colors.primaryLight,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.radius.sm,
+  },
+  statsText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.surface,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+  },
+  resetButton: {
+    width: 24,
+    height: 24,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.surfaceVariant,
+    alignItems: "center",
+    justifyContent: "center",
   },
 }));

@@ -1,17 +1,17 @@
 import React from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useProject } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
+import { Header } from "../../components/Header";
+import { SafeScrollView } from "../../components/SafeScrollView";
 import { Project } from "../../types";
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { theme } = useUnistyles();
-  const insets = useSafeAreaInsets();
   const styles = stylesheet(theme);
 
   // Récupérer le projet via le hook
@@ -81,294 +81,320 @@ export default function ProjectDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header du projet */}
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <View style={styles.headerTop}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.projectName}>{project.nom}</Text>
-            <View
-              style={[
-                styles.statusBadge,
-                { backgroundColor: getStatusColor(project.statut) },
-              ]}
-            >
-              <Text style={styles.statusText}>
-                {getStatusLabel(project.statut)}
-              </Text>
-            </View>
+    <>
+      <Header
+        title={project.nom}
+        subtitle={getStatusLabel(project.statut)}
+        showBackButton={true}
+        rightComponent={
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(project.statut) },
+            ]}
+          >
+            <Text style={styles.statusText}>
+              {getStatusLabel(project.statut)}
+            </Text>
           </View>
-        </View>
-
+        }
+      />
+      <SafeScrollView style={styles.container}>
+        {/* Description et Tags */}
         {project.description && (
-          <Text style={styles.description}>{project.description}</Text>
+          <View style={styles.section}>
+            <Text style={styles.description}>{project.description}</Text>
+          </View>
         )}
 
         {/* Tags */}
         {project.tags && project.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {project.tags.map((tag, index) => (
-              <View key={index} style={styles.tag}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+          <View style={styles.section}>
+            <View style={styles.tagsContainer}>
+              {project.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
-      </View>
 
-      {/* Informations Client */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <MaterialIcons name="person" size={24} color={theme.colors.primary} />
-          <Text style={styles.sectionTitle}>Client</Text>
-        </View>
-
-        <View style={styles.clientCard}>
-          <Text style={styles.clientName}>
-            {project.client.entreprise ||
-              `${project.client.prenom} ${project.client.nom}`}
-          </Text>
-          {project.client.entreprise && (
-            <Text style={styles.clientContact}>
-              {project.client.prenom} {project.client.nom}
-            </Text>
-          )}
-
-          <View style={styles.contactRow}>
-            <MaterialIcons
-              name="email"
-              size={16}
-              color={theme.colors.textSecondary}
-            />
-            <Text style={styles.contactText}>{project.client.email}</Text>
-          </View>
-
-          <View style={styles.contactRow}>
-            <MaterialIcons
-              name="phone"
-              size={16}
-              color={theme.colors.textSecondary}
-            />
-            <Text style={styles.contactText}>{project.client.telephone}</Text>
-          </View>
-
-          <View style={styles.contactRow}>
-            <MaterialIcons
-              name="location-on"
-              size={16}
-              color={theme.colors.textSecondary}
-            />
-            <Text style={styles.contactText}>
-              {project.client.adresse.rue}, {project.client.adresse.ville}{" "}
-              {project.client.adresse.codePostal}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Adresse du chantier */}
-      {project.adresseChantier && (
+        {/* Informations Client */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <MaterialIcons
-              name="construction"
+              name="person"
               size={24}
               color={theme.colors.primary}
             />
-            <Text style={styles.sectionTitle}>Adresse du chantier</Text>
+            <Text style={styles.sectionTitle}>Client</Text>
           </View>
 
-          <View style={styles.addressCard}>
-            <Text style={styles.addressText}>
-              {project.adresseChantier.rue}
+          <View style={styles.clientCard}>
+            <Text style={styles.clientName}>
+              {project.client.entreprise ||
+                `${project.client.prenom} ${project.client.nom}`}
             </Text>
-            <Text style={styles.addressText}>
-              {project.adresseChantier.codePostal}{" "}
-              {project.adresseChantier.ville}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {/* Planning */}
-      {(project.dateDebutPrevue || project.dateFinPrevue) && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons
-              name="schedule"
-              size={24}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.sectionTitle}>Planning</Text>
-          </View>
-
-          <View style={styles.planningCard}>
-            {project.dateDebutPrevue && (
-              <View style={styles.dateRow}>
-                <Text style={styles.dateLabel}>Début prévu :</Text>
-                <Text style={styles.dateValue}>
-                  {formatDate(project.dateDebutPrevue)}
-                </Text>
-              </View>
-            )}
-
-            {project.dateFinPrevue && (
-              <View style={styles.dateRow}>
-                <Text style={styles.dateLabel}>Fin prévue :</Text>
-                <Text style={styles.dateValue}>
-                  {formatDate(project.dateFinPrevue)}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-      )}
-
-      {/* Liste des produits */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <MaterialIcons
-            name="inventory"
-            size={24}
-            color={theme.colors.primary}
-          />
-          <Text style={styles.sectionTitle}>
-            Produits ({project.produits.length})
-          </Text>
-          <Pressable style={styles.addButton}>
-            <MaterialIcons name="add" size={20} color={theme.colors.primary} />
-          </Pressable>
-        </View>
-
-        {project.produits.length === 0 ? (
-          <View style={styles.emptyState}>
-            <MaterialIcons name="inventory" size={48} color="#9E9E9E" />
-            <Text style={styles.emptyText}>Aucun produit ajouté</Text>
-            <Pressable style={styles.addProductButton}>
-              <Text style={styles.addProductText}>Ajouter un produit</Text>
-            </Pressable>
-          </View>
-        ) : (
-          project.produits.map((produit, index) => (
-            <View key={produit.id} style={styles.productCard}>
-              <View style={styles.productHeader}>
-                <Text style={styles.productName}>{produit.product.nom}</Text>
-                <View
-                  style={[
-                    styles.productStatusBadge,
-                    {
-                      backgroundColor:
-                        produit.statut === "valide"
-                          ? "#4CAF50"
-                          : produit.statut === "commande"
-                          ? "#2196F3"
-                          : "#FF9800",
-                    },
-                  ]}
-                >
-                  <Text style={styles.productStatusText}>{produit.statut}</Text>
-                </View>
-              </View>
-
-              <Text style={styles.productDescription}>
-                {produit.product.description}
+            {project.client.entreprise && (
+              <Text style={styles.clientContact}>
+                {project.client.prenom} {project.client.nom}
               </Text>
+            )}
 
-              <View style={styles.productDetails}>
-                <View style={styles.productDetailRow}>
-                  <MaterialIcons name="straighten" size={16} color="#757575" />
-                  <Text style={styles.productDetailText}>
-                    {produit.dimensions.largeur} × {produit.dimensions.hauteur}{" "}
-                    mm
-                  </Text>
-                </View>
+            <View style={styles.contactRow}>
+              <MaterialIcons
+                name="email"
+                size={16}
+                color={theme.colors.textSecondary}
+              />
+              <Text style={styles.contactText}>{project.client.email}</Text>
+            </View>
 
-                <View style={styles.productDetailRow}>
-                  <MaterialIcons
-                    name="format-list-numbered"
-                    size={16}
-                    color="#757575"
-                  />
-                  <Text style={styles.productDetailText}>
-                    Quantité : {produit.quantite}
-                  </Text>
-                </View>
+            <View style={styles.contactRow}>
+              <MaterialIcons
+                name="phone"
+                size={16}
+                color={theme.colors.textSecondary}
+              />
+              <Text style={styles.contactText}>{project.client.telephone}</Text>
+            </View>
 
-                <View style={styles.productDetailRow}>
-                  <MaterialIcons name="palette" size={16} color="#757575" />
-                  <Text style={styles.productDetailText}>
-                    {produit.parametres.materiau} - {produit.parametres.couleur}
-                  </Text>
-                </View>
+            <View style={styles.contactRow}>
+              <MaterialIcons
+                name="location-on"
+                size={16}
+                color={theme.colors.textSecondary}
+              />
+              <Text style={styles.contactText}>
+                {project.client.adresse.rue}, {project.client.adresse.ville}{" "}
+                {project.client.adresse.codePostal}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-                <View style={styles.productDetailRow}>
-                  <MaterialIcons name="schedule" size={16} color="#757575" />
-                  <Text style={styles.productDetailText}>
-                    Créé le {produit.createdAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                </View>
-              </View>
+        {/* Adresse du chantier */}
+        {project.adresseChantier && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons
+                name="construction"
+                size={24}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>Adresse du chantier</Text>
+            </View>
 
-              {produit.notes && (
-                <View style={styles.productNotes}>
-                  <Text style={styles.productNotesText}>
-                    📝 {produit.notes}
+            <View style={styles.addressCard}>
+              <Text style={styles.addressText}>
+                {project.adresseChantier.rue}
+              </Text>
+              <Text style={styles.addressText}>
+                {project.adresseChantier.codePostal}{" "}
+                {project.adresseChantier.ville}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Planning */}
+        {(project.dateDebutPrevue || project.dateFinPrevue) && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons
+                name="schedule"
+                size={24}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>Planning</Text>
+            </View>
+
+            <View style={styles.planningCard}>
+              {project.dateDebutPrevue && (
+                <View style={styles.dateRow}>
+                  <Text style={styles.dateLabel}>Début prévu :</Text>
+                  <Text style={styles.dateValue}>
+                    {formatDate(project.dateDebutPrevue)}
                   </Text>
                 </View>
               )}
 
-              {/* Actions produit */}
-              <View style={styles.productActions}>
-                <Pressable
-                  style={styles.measureButton}
-                  onPress={() => router.push(`/measure/${produit.id}`)}
-                >
-                  <MaterialIcons
-                    name="straighten"
-                    size={18}
-                    color={theme.colors.primary}
-                  />
-                  <Text style={styles.measureButtonText}>Prendre mesures</Text>
-                </Pressable>
-
-                <Pressable style={styles.editProductButton}>
-                  <MaterialIcons name="edit" size={18} color="#757575" />
-                </Pressable>
-              </View>
+              {project.dateFinPrevue && (
+                <View style={styles.dateRow}>
+                  <Text style={styles.dateLabel}>Fin prévue :</Text>
+                  <Text style={styles.dateValue}>
+                    {formatDate(project.dateFinPrevue)}
+                  </Text>
+                </View>
+              )}
             </View>
-          ))
+          </View>
         )}
-      </View>
 
-      {/* Notes du projet */}
-      {project.notes && (
+        {/* Liste des produits */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="note" size={24} color={theme.colors.primary} />
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <MaterialIcons
+              name="inventory"
+              size={24}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.sectionTitle}>
+              Produits ({project.produits.length})
+            </Text>
+            <Pressable style={styles.addButton}>
+              <MaterialIcons
+                name="add"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </Pressable>
           </View>
 
-          <View style={styles.notesCard}>
-            <Text style={styles.notesText}>{project.notes}</Text>
-          </View>
+          {project.produits.length === 0 ? (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="inventory" size={48} color="#9E9E9E" />
+              <Text style={styles.emptyText}>Aucun produit ajouté</Text>
+              <Pressable style={styles.addProductButton}>
+                <Text style={styles.addProductText}>Ajouter un produit</Text>
+              </Pressable>
+            </View>
+          ) : (
+            project.produits.map((produit, index) => (
+              <View key={produit.id} style={styles.productCard}>
+                <View style={styles.productHeader}>
+                  <Text style={styles.productName}>{produit.product.nom}</Text>
+                  <View
+                    style={[
+                      styles.productStatusBadge,
+                      {
+                        backgroundColor:
+                          produit.statut === "valide"
+                            ? "#4CAF50"
+                            : produit.statut === "commande"
+                            ? "#2196F3"
+                            : "#FF9800",
+                      },
+                    ]}
+                  >
+                    <Text style={styles.productStatusText}>
+                      {produit.statut}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.productDescription}>
+                  {produit.product.description}
+                </Text>
+
+                <View style={styles.productDetails}>
+                  <View style={styles.productDetailRow}>
+                    <MaterialIcons
+                      name="straighten"
+                      size={16}
+                      color="#757575"
+                    />
+                    <Text style={styles.productDetailText}>
+                      {produit.dimensions.largeur} ×{" "}
+                      {produit.dimensions.hauteur} mm
+                    </Text>
+                  </View>
+
+                  <View style={styles.productDetailRow}>
+                    <MaterialIcons
+                      name="format-list-numbered"
+                      size={16}
+                      color="#757575"
+                    />
+                    <Text style={styles.productDetailText}>
+                      Quantité : {produit.quantite}
+                    </Text>
+                  </View>
+
+                  <View style={styles.productDetailRow}>
+                    <MaterialIcons name="palette" size={16} color="#757575" />
+                    <Text style={styles.productDetailText}>
+                      {produit.parametres.materiau} -{" "}
+                      {produit.parametres.couleur}
+                    </Text>
+                  </View>
+
+                  <View style={styles.productDetailRow}>
+                    <MaterialIcons name="schedule" size={16} color="#757575" />
+                    <Text style={styles.productDetailText}>
+                      Créé le {produit.createdAt.toLocaleDateString("fr-FR")}
+                    </Text>
+                  </View>
+                </View>
+
+                {produit.notes && (
+                  <View style={styles.productNotes}>
+                    <Text style={styles.productNotesText}>
+                      📝 {produit.notes}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Actions produit */}
+                <View style={styles.productActions}>
+                  <Pressable
+                    style={styles.measureButton}
+                    onPress={() => router.push(`/measure/${produit.id}`)}
+                  >
+                    <MaterialIcons
+                      name="straighten"
+                      size={18}
+                      color={theme.colors.primary}
+                    />
+                    <Text style={styles.measureButtonText}>
+                      Prendre mesures
+                    </Text>
+                  </Pressable>
+
+                  <Pressable style={styles.editProductButton}>
+                    <MaterialIcons name="edit" size={18} color="#757575" />
+                  </Pressable>
+                </View>
+              </View>
+            ))
+          )}
         </View>
-      )}
 
-      {/* Actions */}
-      <View style={styles.actionsSection}>
-        <Pressable style={styles.actionButton}>
-          <MaterialIcons name="edit" size={20} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>Modifier</Text>
-        </Pressable>
+        {/* Notes du projet */}
+        {project.notes && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons
+                name="note"
+                size={24}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>Notes</Text>
+            </View>
 
-        <Pressable style={[styles.actionButton, styles.secondaryButton]}>
-          <MaterialIcons name="share" size={20} color="#FF6B35" />
-          <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
-            Partager
-          </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+            <View style={styles.notesCard}>
+              <Text style={styles.notesText}>{project.notes}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Actions */}
+        <View style={styles.actionsSection}>
+          <Pressable style={styles.actionButton}>
+            <MaterialIcons name="edit" size={20} color="#FFFFFF" />
+            <Text style={styles.actionButtonText}>Modifier</Text>
+          </Pressable>
+
+          <Pressable style={[styles.actionButton, styles.secondaryButton]}>
+            <MaterialIcons name="share" size={20} color="#FF6B35" />
+            <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
+              Partager
+            </Text>
+          </Pressable>
+        </View>
+      </SafeScrollView>
+    </>
   );
 }
 
@@ -400,27 +426,7 @@ const stylesheet = (theme: any) =>
       color: "#FFFFFF",
       fontWeight: theme.typography.fontWeight.medium,
     },
-    header: {
-      backgroundColor: theme.colors.surface,
-      padding: theme.spacing.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    headerTop: {
-      marginBottom: theme.spacing.md,
-    },
-    titleContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-    },
-    projectName: {
-      fontSize: theme.typography.fontSize.xxl,
-      fontWeight: theme.typography.fontWeight.bold,
-      color: theme.colors.text,
-      flex: 1,
-      marginRight: theme.spacing.md,
-    },
+
     statusBadge: {
       paddingHorizontal: theme.spacing.sm,
       paddingVertical: theme.spacing.xs,

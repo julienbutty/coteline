@@ -100,7 +100,7 @@ export default function CustomerDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <>
       {/* Header avec informations principales */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -133,226 +133,234 @@ export default function CustomerDetailScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Stats rapides */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{clientProjects.length}</Text>
-          <Text style={styles.statLabel}>Projets</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {clientProjects.filter((p) => p.statut === "en_cours").length}
-          </Text>
-          <Text style={styles.statLabel}>En cours</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {clientProjects.filter((p) => p.statut === "termine").length}
-          </Text>
-          <Text style={styles.statLabel}>Terminés</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {clientProjects.filter((p) => p.statut === "brouillon").length}
-          </Text>
-          <Text style={styles.statLabel}>Brouillons</Text>
-        </View>
-      </View>
-
-      {/* Onglets */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "info" && styles.activeTab]}
-          onPress={() => setActiveTab("info")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "info" && styles.activeTabText,
-            ]}
-          >
-            Informations
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "projects" && styles.activeTab]}
-          onPress={() => setActiveTab("projects")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "projects" && styles.activeTabText,
-            ]}
-          >
-            Projets
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "history" && styles.activeTab]}
-          onPress={() => setActiveTab("history")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "history" && styles.activeTabText,
-            ]}
-          >
-            Historique
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Contenu des onglets */}
-      <View style={styles.tabContent}>
-        {activeTab === "info" && (
-          <View>
-            {/* Coordonnées */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Coordonnées</Text>
-              <View style={styles.infoCard}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="person" size={20} color="#666" />
-                  <Text style={styles.infoText}>
-                    {client.prenom} {client.nom}
-                  </Text>
-                </View>
-                {client.entreprise && (
-                  <View style={styles.infoRow}>
-                    <Ionicons name="business" size={20} color="#666" />
-                    <Text style={styles.infoText}>{client.entreprise}</Text>
-                  </View>
-                )}
-                <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
-                  <Ionicons name="call" size={20} color="#2F22CF" />
-                  <Text style={[styles.infoText, styles.linkText]}>
-                    {client.telephone}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.infoRow} onPress={handleEmail}>
-                  <Ionicons name="mail" size={20} color="#2F22CF" />
-                  <Text style={[styles.infoText, styles.linkText]}>
-                    {client.email}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Adresse */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Adresse</Text>
-              <View style={styles.infoCard}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="location" size={20} color="#666" />
-                  <View style={styles.addressContainer}>
-                    <Text style={styles.infoText}>{client.adresse.rue}</Text>
-                    <Text style={styles.infoText}>
-                      {client.adresse.codePostal} {client.adresse.ville}
-                    </Text>
-                    <Text style={styles.infoText}>{client.adresse.pays}</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            {/* Notes */}
-            {client.notes && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Notes</Text>
-                <View style={styles.infoCard}>
-                  <Text style={styles.notesText}>{client.notes}</Text>
-                </View>
-              </View>
-            )}
+      <ScrollView style={styles.container}>
+        {/* Stats rapides */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{clientProjects.length}</Text>
+            <Text style={styles.statLabel}>Projets</Text>
           </View>
-        )}
-
-        {activeTab === "projects" && (
-          <View>
-            <Text style={styles.sectionTitle}>
-              Projets ({clientProjects.length})
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {clientProjects.filter((p) => p.statut === "en_cours").length}
             </Text>
-            {clientProjects.map((project) => (
-              <TouchableOpacity
-                key={project.id}
-                style={styles.projectCard}
-                onPress={() => handleProjectPress(project.id)}
-              >
-                <View style={styles.projectHeader}>
-                  <Text style={styles.projectName}>{project.nom}</Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(project.statut) },
-                    ]}
+            <Text style={styles.statLabel}>En cours</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {clientProjects.filter((p) => p.statut === "termine").length}
+            </Text>
+            <Text style={styles.statLabel}>Terminés</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {clientProjects.filter((p) => p.statut === "brouillon").length}
+            </Text>
+            <Text style={styles.statLabel}>Brouillons</Text>
+          </View>
+        </View>
+
+        {/* Onglets */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "info" && styles.activeTab]}
+            onPress={() => setActiveTab("info")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "info" && styles.activeTabText,
+              ]}
+            >
+              Informations
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "projects" && styles.activeTab]}
+            onPress={() => setActiveTab("projects")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "projects" && styles.activeTabText,
+              ]}
+            >
+              Projets
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "history" && styles.activeTab]}
+            onPress={() => setActiveTab("history")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "history" && styles.activeTabText,
+              ]}
+            >
+              Historique
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Contenu des onglets */}
+        <View style={styles.tabContent}>
+          {activeTab === "info" && (
+            <View>
+              {/* Coordonnées */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Coordonnées</Text>
+                <View style={styles.infoCard}>
+                  <View style={styles.infoRow}>
+                    <Ionicons name="person" size={20} color="#666" />
+                    <Text style={styles.infoText}>
+                      {client.prenom} {client.nom}
+                    </Text>
+                  </View>
+                  {client.entreprise && (
+                    <View style={styles.infoRow}>
+                      <Ionicons name="business" size={20} color="#666" />
+                      <Text style={styles.infoText}>{client.entreprise}</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
+                    <Ionicons name="call" size={20} color="#2F22CF" />
+                    <Text style={[styles.infoText, styles.linkText]}>
+                      {client.telephone}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.infoRow}
+                    onPress={handleEmail}
                   >
-                    <Text style={styles.statusText}>
-                      {getStatusText(project.statut)}
+                    <Ionicons name="mail" size={20} color="#2F22CF" />
+                    <Text style={[styles.infoText, styles.linkText]}>
+                      {client.email}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Adresse */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Adresse</Text>
+                <View style={styles.infoCard}>
+                  <View style={styles.infoRow}>
+                    <Ionicons name="location" size={20} color="#666" />
+                    <View style={styles.addressContainer}>
+                      <Text style={styles.infoText}>{client.adresse.rue}</Text>
+                      <Text style={styles.infoText}>
+                        {client.adresse.codePostal} {client.adresse.ville}
+                      </Text>
+                      <Text style={styles.infoText}>{client.adresse.pays}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              {/* Notes */}
+              {client.notes && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Notes</Text>
+                  <View style={styles.infoCard}>
+                    <Text style={styles.notesText}>{client.notes}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {activeTab === "projects" && (
+            <View>
+              <Text style={styles.sectionTitle}>
+                Projets ({clientProjects.length})
+              </Text>
+              {clientProjects.map((project) => (
+                <TouchableOpacity
+                  key={project.id}
+                  style={styles.projectCard}
+                  onPress={() => handleProjectPress(project.id)}
+                >
+                  <View style={styles.projectHeader}>
+                    <Text style={styles.projectName}>{project.nom}</Text>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusColor(project.statut) },
+                      ]}
+                    >
+                      <Text style={styles.statusText}>
+                        {getStatusText(project.statut)}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.projectDescription}>
+                    {project.description}
+                  </Text>
+                  <View style={styles.projectMeta}>
+                    <Text style={styles.projectDate}>
+                      Créé le {project.createdAt.toLocaleDateString("fr-FR")}
+                    </Text>
+                    <Text style={styles.projectDate}>
+                      Modifié le {project.updatedAt.toLocaleDateString("fr-FR")}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {activeTab === "history" && (
+            <View>
+              <Text style={styles.sectionTitle}>
+                Historique des interactions
+              </Text>
+              <View style={styles.historyCard}>
+                <View style={styles.historyItem}>
+                  <View style={styles.historyIcon}>
+                    <Ionicons name="create" size={16} color="#2F22CF" />
+                  </View>
+                  <View style={styles.historyContent}>
+                    <Text style={styles.historyAction}>Client créé</Text>
+                    <Text style={styles.historyDate}>
+                      {client.createdAt.toLocaleDateString("fr-FR")}
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.projectDescription}>
-                  {project.description}
-                </Text>
-                <View style={styles.projectMeta}>
-                  <Text style={styles.projectDate}>
-                    Créé le {project.createdAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                  <Text style={styles.projectDate}>
-                    Modifié le {project.updatedAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {activeTab === "history" && (
-          <View>
-            <Text style={styles.sectionTitle}>Historique des interactions</Text>
-            <View style={styles.historyCard}>
-              <View style={styles.historyItem}>
-                <View style={styles.historyIcon}>
-                  <Ionicons name="create" size={16} color="#2F22CF" />
-                </View>
-                <View style={styles.historyContent}>
-                  <Text style={styles.historyAction}>Client créé</Text>
-                  <Text style={styles.historyDate}>
-                    {client.createdAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.historyItem}>
-                <View style={styles.historyIcon}>
-                  <Ionicons name="refresh" size={16} color="#4CAF50" />
-                </View>
-                <View style={styles.historyContent}>
-                  <Text style={styles.historyAction}>Dernière mise à jour</Text>
-                  <Text style={styles.historyDate}>
-                    {client.updatedAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                </View>
-              </View>
-              {clientProjects.map((project) => (
-                <View key={project.id} style={styles.historyItem}>
+                <View style={styles.historyItem}>
                   <View style={styles.historyIcon}>
-                    <Ionicons name="add-circle" size={16} color="#FF6B35" />
+                    <Ionicons name="refresh" size={16} color="#4CAF50" />
                   </View>
                   <View style={styles.historyContent}>
                     <Text style={styles.historyAction}>
-                      Projet "{project.nom}" créé
+                      Dernière mise à jour
                     </Text>
                     <Text style={styles.historyDate}>
-                      {project.createdAt.toLocaleDateString("fr-FR")}
+                      {client.updatedAt.toLocaleDateString("fr-FR")}
                     </Text>
                   </View>
                 </View>
-              ))}
+                {clientProjects.map((project) => (
+                  <View key={project.id} style={styles.historyItem}>
+                    <View style={styles.historyIcon}>
+                      <Ionicons name="add-circle" size={16} color="#FF6B35" />
+                    </View>
+                    <View style={styles.historyContent}>
+                      <Text style={styles.historyAction}>
+                        Projet "{project.nom}" créé
+                      </Text>
+                      <Text style={styles.historyDate}>
+                        {project.createdAt.toLocaleDateString("fr-FR")}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
             </View>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 

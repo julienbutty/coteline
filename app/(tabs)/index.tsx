@@ -1,228 +1,236 @@
 import React from "react";
-import { Text, View, ScrollView, Pressable } from "react-native";
+import { Text, View, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProjects } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
+import { Header } from "../../components/Header";
+import { SafeScrollView } from "../../components/SafeScrollView";
 
 export default function ProjectsScreen() {
-  const insets = useSafeAreaInsets();
   const { data: projects, loading, error, refetch } = useProjects();
   const { theme } = useUnistyles();
   const styles = stylesheet(theme);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.title}>Mes Projets</Text>
-        <Text style={styles.subtitle}>Gestion de vos chantiers menuiserie</Text>
-      </View>
+    <>
+      <Header
+        title="Mes Projets"
+        subtitle="Gestion de vos chantiers menuiserie"
+      />
+      <SafeScrollView style={styles.container}>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialIcons
+              name="build"
+              size={24}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statLabel}>En cours</Text>
+          </View>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <MaterialIcons name="build" size={24} color={theme.colors.primary} />
-          <Text style={styles.statNumber}>8</Text>
-          <Text style={styles.statLabel}>En cours</Text>
+          <View style={styles.statCard}>
+            <MaterialIcons
+              name="pending"
+              size={24}
+              color={theme.colors.warning}
+            />
+            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statLabel}>En attente</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <MaterialIcons
+              name="check-circle"
+              size={24}
+              color={theme.colors.success}
+            />
+            <Text style={styles.statNumber}>23</Text>
+            <Text style={styles.statLabel}>Terminés</Text>
+          </View>
         </View>
 
-        <View style={styles.statCard}>
-          <MaterialIcons
-            name="pending"
-            size={24}
-            color={theme.colors.warning}
-          />
-          <Text style={styles.statNumber}>5</Text>
-          <Text style={styles.statLabel}>En attente</Text>
-        </View>
+        <View style={styles.projectsSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Projets récents</Text>
+            <Pressable style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>Voir tout</Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.statCard}>
-          <MaterialIcons
-            name="check-circle"
-            size={24}
-            color={theme.colors.success}
-          />
-          <Text style={styles.statNumber}>23</Text>
-          <Text style={styles.statLabel}>Terminés</Text>
-        </View>
-      </View>
+          <LoadingState
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+            isEmpty={projects.length === 0}
+            emptyMessage="Aucun projet trouvé"
+          >
+            {projects.slice(0, 3).map((project) => {
+              const getStatusColor = (statut: string) => {
+                switch (statut) {
+                  case "en_cours":
+                    return theme.colors.success;
+                  case "brouillon":
+                    return theme.colors.warning;
+                  case "termine":
+                    return theme.colors.info;
+                  case "annule":
+                    return theme.colors.error;
+                  default:
+                    return theme.colors.textTertiary;
+                }
+              };
 
-      <View style={styles.projectsSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Projets récents</Text>
-          <Pressable style={styles.viewAllButton}>
-            <Text style={styles.viewAllText}>Voir tout</Text>
-          </Pressable>
-        </View>
+              const getStatusLabel = (statut: string) => {
+                switch (statut) {
+                  case "en_cours":
+                    return "En cours";
+                  case "brouillon":
+                    return "Brouillon";
+                  case "termine":
+                    return "Terminé";
+                  case "annule":
+                    return "Annulé";
+                  default:
+                    return statut;
+                }
+              };
 
-        <LoadingState
-          loading={loading}
-          error={error}
-          onRetry={refetch}
-          isEmpty={projects.length === 0}
-          emptyMessage="Aucun projet trouvé"
-        >
-          {projects.slice(0, 3).map((project) => {
-            const getStatusColor = (statut: string) => {
-              switch (statut) {
-                case "en_cours":
-                  return theme.colors.success;
-                case "brouillon":
-                  return theme.colors.warning;
-                case "termine":
-                  return theme.colors.info;
-                case "annule":
-                  return theme.colors.error;
-                default:
-                  return theme.colors.textTertiary;
-              }
-            };
+              const totalProductCount = project.produits.reduce(
+                (total, produit) => {
+                  return total + produit.quantite;
+                },
+                0
+              );
 
-            const getStatusLabel = (statut: string) => {
-              switch (statut) {
-                case "en_cours":
-                  return "En cours";
-                case "brouillon":
-                  return "Brouillon";
-                case "termine":
-                  return "Terminé";
-                case "annule":
-                  return "Annulé";
-                default:
-                  return statut;
-              }
-            };
+              // Calcul du pourcentage d'avancement (simulé)
+              const getProgress = () => {
+                if (project.statut === "termine") return 100;
+                if (project.statut === "brouillon") return 0;
+                if (project.statut === "en_cours") {
+                  // Simuler un pourcentage basé sur l'ID du projet
+                  return project.id === "proj-1" ? 65 : 20;
+                }
+                return 0;
+              };
 
-            const totalProductCount = project.produits.reduce(
-              (total, produit) => {
-                return total + produit.quantite;
-              },
-              0
-            );
+              const progress = getProgress();
 
-            // Calcul du pourcentage d'avancement (simulé)
-            const getProgress = () => {
-              if (project.statut === "termine") return 100;
-              if (project.statut === "brouillon") return 0;
-              if (project.statut === "en_cours") {
-                // Simuler un pourcentage basé sur l'ID du projet
-                return project.id === "proj-1" ? 65 : 20;
-              }
-              return 0;
-            };
-
-            const progress = getProgress();
-
-            return (
-              <Pressable
-                key={project.id}
-                style={styles.projectCard}
-                onPress={() => router.push(`/project/${project.id}`)}
-              >
-                <View style={styles.projectHeader}>
-                  <View style={styles.projectInfo}>
-                    <Text style={styles.projectName}>{project.nom}</Text>
-                    <Text style={styles.projectClient}>
-                      {project.client.entreprise ||
-                        `${project.client.prenom} ${project.client.nom}`}
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(project.statut) },
-                    ]}
-                  >
-                    <Text style={styles.statusText}>
-                      {getStatusLabel(project.statut)}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.projectDetails}>
-                  <View style={styles.projectStat}>
-                    <MaterialIcons
-                      name="inventory"
-                      size={16}
-                      color={theme.colors.textSecondary}
-                    />
-                    <Text style={styles.projectStatText}>
-                      {totalProductCount} éléments
-                    </Text>
-                  </View>
-                  <View style={styles.projectStat}>
-                    <MaterialIcons
-                      name="schedule"
-                      size={16}
-                      color={theme.colors.textSecondary}
-                    />
-                    <Text style={styles.projectStatText}>
-                      Créé le {project.createdAt.toLocaleDateString("fr-FR")}
-                    </Text>
-                  </View>
-                </View>
-
-                {project.statut === "en_cours" && (
-                  <View style={styles.progressContainer}>
-                    <Text style={styles.progressLabel}>
-                      Avancement: {progress}%
-                    </Text>
-                    <View style={styles.progressBar}>
-                      <View
-                        style={[styles.progressFill, { width: `${progress}%` }]}
-                      />
+              return (
+                <Pressable
+                  key={project.id}
+                  style={styles.projectCard}
+                  onPress={() => router.push(`/project/${project.id}`)}
+                >
+                  <View style={styles.projectHeader}>
+                    <View style={styles.projectInfo}>
+                      <Text style={styles.projectName}>{project.nom}</Text>
+                      <Text style={styles.projectClient}>
+                        {project.client.entreprise ||
+                          `${project.client.prenom} ${project.client.nom}`}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusColor(project.statut) },
+                      ]}
+                    >
+                      <Text style={styles.statusText}>
+                        {getStatusLabel(project.statut)}
+                      </Text>
                     </View>
                   </View>
-                )}
-              </Pressable>
-            );
-          })}
-        </LoadingState>
-      </View>
 
-      <View style={styles.quickActions}>
-        <Text style={styles.sectionTitle}>Actions rapides</Text>
+                  <View style={styles.projectDetails}>
+                    <View style={styles.projectStat}>
+                      <MaterialIcons
+                        name="inventory"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                      />
+                      <Text style={styles.projectStatText}>
+                        {totalProductCount} éléments
+                      </Text>
+                    </View>
+                    <View style={styles.projectStat}>
+                      <MaterialIcons
+                        name="schedule"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                      />
+                      <Text style={styles.projectStatText}>
+                        Créé le {project.createdAt.toLocaleDateString("fr-FR")}
+                      </Text>
+                    </View>
+                  </View>
 
-        <View style={styles.actionsGrid}>
-          <Pressable style={styles.actionCard}>
-            <MaterialIcons
-              name="add-box"
-              size={32}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.actionText}>Nouveau projet</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionCard}>
-            <MaterialIcons
-              name="calculate"
-              size={32}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.actionText}>Calculateur</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionCard}>
-            <MaterialIcons
-              name="inventory"
-              size={32}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.actionText}>Stock</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionCard}>
-            <MaterialIcons
-              name="description"
-              size={32}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.actionText}>Devis</Text>
-          </Pressable>
+                  {project.statut === "en_cours" && (
+                    <View style={styles.progressContainer}>
+                      <Text style={styles.progressLabel}>
+                        Avancement: {progress}%
+                      </Text>
+                      <View style={styles.progressBar}>
+                        <View
+                          style={[
+                            styles.progressFill,
+                            { width: `${progress}%` },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </LoadingState>
         </View>
-      </View>
-    </ScrollView>
+
+        <View style={styles.quickActions}>
+          <Text style={styles.sectionTitle}>Actions rapides</Text>
+
+          <View style={styles.actionsGrid}>
+            <Pressable style={styles.actionCard}>
+              <MaterialIcons
+                name="add-box"
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.actionText}>Nouveau projet</Text>
+            </Pressable>
+
+            <Pressable style={styles.actionCard}>
+              <MaterialIcons
+                name="calculate"
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.actionText}>Calculateur</Text>
+            </Pressable>
+
+            <Pressable style={styles.actionCard}>
+              <MaterialIcons
+                name="inventory"
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.actionText}>Stock</Text>
+            </Pressable>
+
+            <Pressable style={styles.actionCard}>
+              <MaterialIcons
+                name="description"
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.actionText}>Devis</Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeScrollView>
+    </>
   );
 }
 
@@ -231,22 +239,6 @@ const stylesheet = (theme: any) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    header: {
-      padding: theme.spacing.lg,
-      backgroundColor: theme.colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    title: {
-      fontSize: theme.typography.fontSize.xxl,
-      fontWeight: theme.typography.fontWeight.bold,
-      color: theme.colors.text,
-      marginBottom: theme.spacing.xs,
-    },
-    subtitle: {
-      fontSize: theme.typography.fontSize.md,
-      color: theme.colors.textSecondary,
     },
     statsContainer: {
       flexDirection: "row",

@@ -331,7 +331,7 @@ export default function ProductDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <>
       {/* Header avec informations principales */}
       <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <TouchableOpacity
@@ -357,62 +357,67 @@ export default function ProductDetailScreen() {
         </View>
       </View>
 
-      {/* Actions */}
-      <View style={styles.priceSection}>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddToProject}>
-          <Ionicons name="add" size={20} color="#FFFFFF" />
-          <Text style={styles.addButtonText}>Ajouter à un projet</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView style={styles.container}>
+        {/* Actions */}
+        <View style={styles.priceSection}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddToProject}
+          >
+            <Ionicons name="add" size={20} color="#FFFFFF" />
+            <Text style={styles.addButtonText}>Ajouter à un projet</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Onglets */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "specs" && styles.activeTab]}
-          onPress={() => setActiveTab("specs")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "specs" && styles.activeTabText,
-            ]}
+        {/* Onglets */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "specs" && styles.activeTab]}
+            onPress={() => setActiveTab("specs")}
           >
-            Spécifications
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "dimensions" && styles.activeTab]}
-          onPress={() => setActiveTab("dimensions")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "dimensions" && styles.activeTabText,
-            ]}
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "specs" && styles.activeTabText,
+              ]}
+            >
+              Spécifications
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "dimensions" && styles.activeTab]}
+            onPress={() => setActiveTab("dimensions")}
           >
-            Dimensions
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "projects" && styles.activeTab]}
-          onPress={() => setActiveTab("projects")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "projects" && styles.activeTabText,
-            ]}
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "dimensions" && styles.activeTabText,
+              ]}
+            >
+              Dimensions
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "projects" && styles.activeTab]}
+            onPress={() => setActiveTab("projects")}
           >
-            Projets
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "projects" && styles.activeTabText,
+              ]}
+            >
+              Projets
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Contenu des onglets */}
-      {activeTab === "specs" && renderSpecifications()}
-      {activeTab === "dimensions" && renderDimensions()}
-      {activeTab === "projects" && renderProjects()}
-    </ScrollView>
+        {/* Contenu des onglets */}
+        {activeTab === "specs" && renderSpecifications()}
+        {activeTab === "dimensions" && renderDimensions()}
+        {activeTab === "projects" && renderProjects()}
+      </ScrollView>
+    </>
   );
 }
 
