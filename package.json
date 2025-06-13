@@ -9,6 +9,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "test:supabase": "bun run scripts/test-supabase.ts",
+    "test:services": "bun run scripts/test-services.ts",
+    "test:all": "bun run test:supabase && bun run test:services",
     "db:push": "bunx supabase db push",
     "db:reset": "bunx supabase db reset",
     "db:diff": "bunx supabase db diff",

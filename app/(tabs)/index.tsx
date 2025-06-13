@@ -1,13 +1,16 @@
-import React from 'react';
-import { Text, View, ScrollView, Pressable } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { projects } from '../../data/mockData';
+import React from "react";
+import { Text, View, ScrollView, Pressable } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useProjects } from "../../hooks/useSupabase";
+import { LoadingState } from "../../components/LoadingState";
 
 export default function ProjectsScreen() {
   const insets = useSafeAreaInsets();
+  const { data: projects, loading, error, refetch } = useProjects();
+
   return (
     <ScrollView style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
@@ -43,91 +46,126 @@ export default function ProjectsScreen() {
           </Pressable>
         </View>
 
-        {projects.slice(0, 3).map((project) => {
-          const getStatusColor = (statut: string) => {
-            switch (statut) {
-              case 'en_cours': return '#4CAF50';
-              case 'brouillon': return '#FF9800';
-              case 'termine': return '#2196F3';
-              case 'annule': return '#F44336';
-              default: return '#757575';
-            }
-          };
+        <LoadingState
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+          isEmpty={projects.length === 0}
+          emptyMessage="Aucun projet trouvé"
+        >
+          {projects.slice(0, 3).map((project) => {
+            const getStatusColor = (statut: string) => {
+              switch (statut) {
+                case "en_cours":
+                  return "#4CAF50";
+                case "brouillon":
+                  return "#FF9800";
+                case "termine":
+                  return "#2196F3";
+                case "annule":
+                  return "#F44336";
+                default:
+                  return "#757575";
+              }
+            };
 
-          const getStatusLabel = (statut: string) => {
-            switch (statut) {
-              case 'en_cours': return 'En cours';
-              case 'brouillon': return 'Brouillon';
-              case 'termine': return 'Terminé';
-              case 'annule': return 'Annulé';
-              default: return statut;
-            }
-          };
+            const getStatusLabel = (statut: string) => {
+              switch (statut) {
+                case "en_cours":
+                  return "En cours";
+                case "brouillon":
+                  return "Brouillon";
+                case "termine":
+                  return "Terminé";
+                case "annule":
+                  return "Annulé";
+                default:
+                  return statut;
+              }
+            };
 
-          const totalProductCount = project.produits.reduce((total, produit) => {
-            return total + produit.quantite;
-          }, 0);
+            const totalProductCount = project.produits.reduce(
+              (total, produit) => {
+                return total + produit.quantite;
+              },
+              0
+            );
 
-          // Calcul du pourcentage d'avancement (simulé)
-          const getProgress = () => {
-            if (project.statut === 'termine') return 100;
-            if (project.statut === 'brouillon') return 0;
-            if (project.statut === 'en_cours') {
-              // Simuler un pourcentage basé sur l'ID du projet
-              return project.id === 'proj-1' ? 65 : 20;
-            }
-            return 0;
-          };
+            // Calcul du pourcentage d'avancement (simulé)
+            const getProgress = () => {
+              if (project.statut === "termine") return 100;
+              if (project.statut === "brouillon") return 0;
+              if (project.statut === "en_cours") {
+                // Simuler un pourcentage basé sur l'ID du projet
+                return project.id === "proj-1" ? 65 : 20;
+              }
+              return 0;
+            };
 
-          const progress = getProgress();
+            const progress = getProgress();
 
-          return (
-            <Pressable 
-              key={project.id} 
-              style={styles.projectCard}
-              onPress={() => router.push(`/project/${project.id}`)}
-            >
-              <View style={styles.projectHeader}>
-                <View style={styles.projectInfo}>
-                  <Text style={styles.projectName}>{project.nom}</Text>
-                  <Text style={styles.projectClient}>
-                    {project.client.entreprise || `${project.client.prenom} ${project.client.nom}`}
-                  </Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(project.statut) }]}>
-                  <Text style={styles.statusText}>{getStatusLabel(project.statut)}</Text>
-                </View>
-              </View>
-              
-              <View style={styles.projectDetails}>
-                <View style={styles.projectStat}>
-                  <MaterialIcons name="inventory" size={16} color="#757575" />
-                  <Text style={styles.projectStatText}>{totalProductCount} éléments</Text>
-                </View>
-                <View style={styles.projectStat}>
-                  <MaterialIcons name="schedule" size={16} color="#757575" />
-                  <Text style={styles.projectStatText}>
-                    Créé le {project.createdAt.toLocaleDateString('fr-FR')}
-                  </Text>
-                </View>
-              </View>
-
-              {project.statut === 'en_cours' && (
-                <View style={styles.progressContainer}>
-                  <Text style={styles.progressLabel}>Avancement: {progress}%</Text>
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: `${progress}%` }]} />
+            return (
+              <Pressable
+                key={project.id}
+                style={styles.projectCard}
+                onPress={() => router.push(`/project/${project.id}`)}
+              >
+                <View style={styles.projectHeader}>
+                  <View style={styles.projectInfo}>
+                    <Text style={styles.projectName}>{project.nom}</Text>
+                    <Text style={styles.projectClient}>
+                      {project.client.entreprise ||
+                        `${project.client.prenom} ${project.client.nom}`}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: getStatusColor(project.statut) },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>
+                      {getStatusLabel(project.statut)}
+                    </Text>
                   </View>
                 </View>
-              )}
-            </Pressable>
-          );
-        })}
+
+                <View style={styles.projectDetails}>
+                  <View style={styles.projectStat}>
+                    <MaterialIcons name="inventory" size={16} color="#757575" />
+                    <Text style={styles.projectStatText}>
+                      {totalProductCount} éléments
+                    </Text>
+                  </View>
+                  <View style={styles.projectStat}>
+                    <MaterialIcons name="schedule" size={16} color="#757575" />
+                    <Text style={styles.projectStatText}>
+                      Créé le {project.createdAt.toLocaleDateString("fr-FR")}
+                    </Text>
+                  </View>
+                </View>
+
+                {project.statut === "en_cours" && (
+                  <View style={styles.progressContainer}>
+                    <Text style={styles.progressLabel}>
+                      Avancement: {progress}%
+                    </Text>
+                    <View style={styles.progressBar}>
+                      <View
+                        style={[styles.progressFill, { width: `${progress}%` }]}
+                      />
+                    </View>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </LoadingState>
       </View>
 
       <View style={styles.quickActions}>
         <Text style={styles.sectionTitle}>Actions rapides</Text>
-        
+
         <View style={styles.actionsGrid}>
           <Pressable style={styles.actionCard}>
             <MaterialIcons name="add-box" size={32} color="#FF6B35" />
@@ -176,7 +214,7 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textSecondary,
   },
   statsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: theme.spacing.md,
     gap: theme.spacing.sm,
   },
@@ -185,7 +223,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadows.sm,
@@ -199,16 +237,16 @@ const styles = StyleSheet.create((theme) => ({
   statLabel: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xs,
   },
   projectsSection: {
     padding: theme.spacing.md,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   sectionTitle: {
@@ -234,9 +272,9 @@ const styles = StyleSheet.create((theme) => ({
     ...theme.shadows.sm,
   },
   projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: theme.spacing.md,
   },
   projectInfo: {
@@ -263,17 +301,17 @@ const styles = StyleSheet.create((theme) => ({
   },
   statusText: {
     fontSize: theme.typography.fontSize.xs,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontWeight: theme.typography.fontWeight.medium,
   },
   projectDetails: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.md,
     marginBottom: theme.spacing.md,
   },
   projectStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.xs,
   },
   projectStatText: {
@@ -292,26 +330,26 @@ const styles = StyleSheet.create((theme) => ({
     height: 6,
     backgroundColor: theme.colors.border,
     borderRadius: theme.radius.xs,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressFill: {
-    height: '100%',
+    height: "100%",
     backgroundColor: theme.colors.primary,
   },
   quickActions: {
     padding: theme.spacing.md,
   },
   actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.md,
   },
   actionCard: {
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.lg,
     borderRadius: theme.radius.md,
-    alignItems: 'center',
-    width: '47%',
+    alignItems: "center",
+    width: "47%",
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadows.sm,
@@ -320,7 +358,7 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text,
     marginTop: theme.spacing.sm,
-    textAlign: 'center',
+    textAlign: "center",
     fontWeight: theme.typography.fontWeight.medium,
   },
 }));

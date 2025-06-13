@@ -1,21 +1,58 @@
-import React, { useState } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { clients, projects } from '../../data/mockData';
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useClient, useProjectsByClient } from "../../hooks/useSupabase";
+import { LoadingState } from "../../components/LoadingState";
 
 export default function CustomerDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<'info' | 'projects' | 'history'>('info');
+  const [activeTab, setActiveTab] = useState<"info" | "projects" | "history">(
+    "info"
+  );
 
-  const client = clients.find(c => c.id === id);
-  const clientProjects = projects.filter(p => p.clientId === id);
+  // Récupérer le client et ses projets
+  const {
+    data: client,
+    loading: clientLoading,
+    error: clientError,
+    refetch: refetchClient,
+  } = useClient(id as string);
+  const {
+    data: clientProjects,
+    loading: projectsLoading,
+    error: projectsError,
+    refetch: refetchProjects,
+  } = useProjectsByClient(id as string);
 
-  if (!client) {
+  // Gestion des états de chargement et d'erreur
+  if (clientLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Client non trouvé</Text>
+        <LoadingState loading={true} error={null} onRetry={refetchClient}>
+          <></>
+        </LoadingState>
+      </View>
+    );
+  }
+
+  if (clientError || !client) {
+    return (
+      <View style={styles.container}>
+        <LoadingState
+          loading={false}
+          error={clientError || "Client introuvable"}
+          onRetry={refetchClient}
+        >
+          <></>
+        </LoadingState>
       </View>
     );
   }
@@ -38,19 +75,27 @@ export default function CustomerDetailScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'en_cours': return '#4CAF50';
-      case 'brouillon': return '#FF9800';
-      case 'termine': return '#2196F3';
-      default: return '#9E9E9E';
+      case "en_cours":
+        return "#4CAF50";
+      case "brouillon":
+        return "#FF9800";
+      case "termine":
+        return "#2196F3";
+      default:
+        return "#9E9E9E";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'en_cours': return 'En cours';
-      case 'brouillon': return 'Brouillon';
-      case 'termine': return 'Terminé';
-      default: return 'Inconnu';
+      case "en_cours":
+        return "En cours";
+      case "brouillon":
+        return "Brouillon";
+      case "termine":
+        return "Terminé";
+      default:
+        return "Inconnu";
     }
   };
 
@@ -58,13 +103,13 @@ export default function CustomerDetailScreen() {
     <ScrollView style={styles.container}>
       {/* Header avec informations principales */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        
+
         <View style={styles.headerContent}>
           <Text style={styles.clientName}>
             {client.entreprise || `${client.prenom} ${client.nom}`}
@@ -75,7 +120,7 @@ export default function CustomerDetailScreen() {
             </Text>
           )}
           <Text style={styles.clientSince}>
-            Client depuis le {client.createdAt.toLocaleDateString('fr-FR')}
+            Client depuis le {client.createdAt.toLocaleDateString("fr-FR")}
           </Text>
         </View>
 
@@ -97,19 +142,19 @@ export default function CustomerDetailScreen() {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {clientProjects.filter(p => p.statut === 'en_cours').length}
+            {clientProjects.filter((p) => p.statut === "en_cours").length}
           </Text>
           <Text style={styles.statLabel}>En cours</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {clientProjects.filter(p => p.statut === 'termine').length}
+            {clientProjects.filter((p) => p.statut === "termine").length}
           </Text>
           <Text style={styles.statLabel}>Terminés</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {clientProjects.filter(p => p.statut === 'brouillon').length}
+            {clientProjects.filter((p) => p.statut === "brouillon").length}
           </Text>
           <Text style={styles.statLabel}>Brouillons</Text>
         </View>
@@ -117,27 +162,42 @@ export default function CustomerDetailScreen() {
 
       {/* Onglets */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'info' && styles.activeTab]}
-          onPress={() => setActiveTab('info')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "info" && styles.activeTab]}
+          onPress={() => setActiveTab("info")}
         >
-          <Text style={[styles.tabText, activeTab === 'info' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "info" && styles.activeTabText,
+            ]}
+          >
             Informations
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'projects' && styles.activeTab]}
-          onPress={() => setActiveTab('projects')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "projects" && styles.activeTab]}
+          onPress={() => setActiveTab("projects")}
         >
-          <Text style={[styles.tabText, activeTab === 'projects' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "projects" && styles.activeTabText,
+            ]}
+          >
             Projets
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'history' && styles.activeTab]}
-          onPress={() => setActiveTab('history')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "history" && styles.activeTab]}
+          onPress={() => setActiveTab("history")}
         >
-          <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "history" && styles.activeTabText,
+            ]}
+          >
             Historique
           </Text>
         </TouchableOpacity>
@@ -145,7 +205,7 @@ export default function CustomerDetailScreen() {
 
       {/* Contenu des onglets */}
       <View style={styles.tabContent}>
-        {activeTab === 'info' && (
+        {activeTab === "info" && (
           <View>
             {/* Coordonnées */}
             <View style={styles.section}>
@@ -165,11 +225,15 @@ export default function CustomerDetailScreen() {
                 )}
                 <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
                   <Ionicons name="call" size={20} color="#2F22CF" />
-                  <Text style={[styles.infoText, styles.linkText]}>{client.telephone}</Text>
+                  <Text style={[styles.infoText, styles.linkText]}>
+                    {client.telephone}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.infoRow} onPress={handleEmail}>
                   <Ionicons name="mail" size={20} color="#2F22CF" />
-                  <Text style={[styles.infoText, styles.linkText]}>{client.email}</Text>
+                  <Text style={[styles.infoText, styles.linkText]}>
+                    {client.email}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -203,28 +267,39 @@ export default function CustomerDetailScreen() {
           </View>
         )}
 
-        {activeTab === 'projects' && (
+        {activeTab === "projects" && (
           <View>
-            <Text style={styles.sectionTitle}>Projets ({clientProjects.length})</Text>
+            <Text style={styles.sectionTitle}>
+              Projets ({clientProjects.length})
+            </Text>
             {clientProjects.map((project) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 key={project.id}
                 style={styles.projectCard}
                 onPress={() => handleProjectPress(project.id)}
               >
                 <View style={styles.projectHeader}>
                   <Text style={styles.projectName}>{project.nom}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(project.statut) }]}>
-                    <Text style={styles.statusText}>{getStatusText(project.statut)}</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: getStatusColor(project.statut) },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>
+                      {getStatusText(project.statut)}
+                    </Text>
                   </View>
                 </View>
-                <Text style={styles.projectDescription}>{project.description}</Text>
+                <Text style={styles.projectDescription}>
+                  {project.description}
+                </Text>
                 <View style={styles.projectMeta}>
                   <Text style={styles.projectDate}>
-                    Créé le {project.createdAt.toLocaleDateString('fr-FR')}
+                    Créé le {project.createdAt.toLocaleDateString("fr-FR")}
                   </Text>
                   <Text style={styles.projectDate}>
-                    Modifié le {project.updatedAt.toLocaleDateString('fr-FR')}
+                    Modifié le {project.updatedAt.toLocaleDateString("fr-FR")}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -232,7 +307,7 @@ export default function CustomerDetailScreen() {
           </View>
         )}
 
-        {activeTab === 'history' && (
+        {activeTab === "history" && (
           <View>
             <Text style={styles.sectionTitle}>Historique des interactions</Text>
             <View style={styles.historyCard}>
@@ -243,7 +318,7 @@ export default function CustomerDetailScreen() {
                 <View style={styles.historyContent}>
                   <Text style={styles.historyAction}>Client créé</Text>
                   <Text style={styles.historyDate}>
-                    {client.createdAt.toLocaleDateString('fr-FR')}
+                    {client.createdAt.toLocaleDateString("fr-FR")}
                   </Text>
                 </View>
               </View>
@@ -254,7 +329,7 @@ export default function CustomerDetailScreen() {
                 <View style={styles.historyContent}>
                   <Text style={styles.historyAction}>Dernière mise à jour</Text>
                   <Text style={styles.historyDate}>
-                    {client.updatedAt.toLocaleDateString('fr-FR')}
+                    {client.updatedAt.toLocaleDateString("fr-FR")}
                   </Text>
                 </View>
               </View>
@@ -264,9 +339,11 @@ export default function CustomerDetailScreen() {
                     <Ionicons name="add-circle" size={16} color="#FF6B35" />
                   </View>
                   <View style={styles.historyContent}>
-                    <Text style={styles.historyAction}>Projet "{project.nom}" créé</Text>
+                    <Text style={styles.historyAction}>
+                      Projet "{project.nom}" créé
+                    </Text>
                     <Text style={styles.historyDate}>
-                      {project.createdAt.toLocaleDateString('fr-FR')}
+                      {project.createdAt.toLocaleDateString("fr-FR")}
                     </Text>
                   </View>
                 </View>
@@ -287,15 +364,15 @@ const styles = StyleSheet.create((theme) => ({
   errorText: {
     fontSize: theme.typography.fontSize.lg,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xl,
   },
   header: {
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.lg,
     paddingTop: theme.spacing.xl + 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButton: {
     marginRight: theme.spacing.md,
@@ -306,29 +383,29 @@ const styles = StyleSheet.create((theme) => ({
   clientName: {
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     marginBottom: theme.spacing.xs,
   },
   contactName: {
     fontSize: theme.typography.fontSize.sm,
-    color: 'rgba(255,255,255,0.8)',
+    color: "rgba(255,255,255,0.8)",
     marginBottom: theme.spacing.xs,
   },
   clientSince: {
     fontSize: theme.typography.fontSize.xs,
-    color: 'rgba(255,255,255,0.7)',
+    color: "rgba(255,255,255,0.7)",
   },
   quickActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.sm,
   },
   actionButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: "rgba(255,255,255,0.2)",
     padding: theme.spacing.sm,
     borderRadius: theme.radius.md,
   },
   statsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: theme.spacing.md,
     gap: theme.spacing.sm,
   },
@@ -337,7 +414,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadows.sm,
@@ -350,11 +427,11 @@ const styles = StyleSheet.create((theme) => ({
   statLabel: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xs,
   },
   tabContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: theme.colors.surface,
     marginHorizontal: theme.spacing.md,
     borderRadius: theme.radius.md,
@@ -366,7 +443,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     borderRadius: theme.radius.sm,
-    alignItems: 'center',
+    alignItems: "center",
   },
   activeTab: {
     backgroundColor: theme.colors.primary,
@@ -377,7 +454,7 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: theme.typography.fontWeight.medium,
   },
   activeTabText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   tabContent: {
     padding: theme.spacing.md,
@@ -400,8 +477,8 @@ const styles = StyleSheet.create((theme) => ({
     ...theme.shadows.sm,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   infoText: {
@@ -421,7 +498,7 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.md,
     color: theme.colors.text,
     lineHeight: 22,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   projectCard: {
     backgroundColor: theme.colors.surface,
@@ -433,9 +510,9 @@ const styles = StyleSheet.create((theme) => ({
     ...theme.shadows.sm,
   },
   projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   projectName: {
@@ -451,7 +528,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   statusText: {
     fontSize: theme.typography.fontSize.xs,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontWeight: theme.typography.fontWeight.medium,
   },
   projectDescription: {
@@ -460,8 +537,8 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing.sm,
   },
   projectMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   projectDate: {
     fontSize: theme.typography.fontSize.xs,
@@ -476,17 +553,17 @@ const styles = StyleSheet.create((theme) => ({
     ...theme.shadows.sm,
   },
   historyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   historyIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(47, 34, 207, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(47, 34, 207, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: theme.spacing.md,
   },
   historyContent: {
@@ -502,4 +579,4 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xs,
   },
-})); 
+}));

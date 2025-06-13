@@ -1,43 +1,99 @@
-import React, { useState } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { products, productCategories, projects } from '../../data/mockData';
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  useProduct,
+  useProductCategories,
+  useProjects,
+} from "../../hooks/useSupabase";
+import { LoadingState } from "../../components/LoadingState";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<'specs' | 'dimensions' | 'projects'>('specs');
+  const [activeTab, setActiveTab] = useState<
+    "specs" | "dimensions" | "projects"
+  >("specs");
 
-  const product = products.find(p => p.id === id);
-  const category = product ? productCategories.find(c => c.id === product.categoryId) : null;
-  const relatedProjects = projects.filter(p => 
-    p.produits.some(pp => pp.productId === id)
+  // Récupérer les données via les hooks
+  const {
+    data: product,
+    loading: productLoading,
+    error: productError,
+    refetch: refetchProduct,
+  } = useProduct(id as string);
+  const {
+    data: productCategories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useProductCategories();
+  const {
+    data: projects,
+    loading: projectsLoading,
+    error: projectsError,
+  } = useProjects();
+
+  // Calculer les données dérivées
+  const category =
+    product && productCategories.length > 0
+      ? productCategories.find((c) => c.id === product.categoryId)
+      : null;
+  const relatedProjects = projects.filter((p) =>
+    p.produits.some((pp) => pp.productId === id)
   );
 
-  if (!product) {
+  // Gestion des états de chargement et d'erreur
+  if (productLoading || categoriesLoading || projectsLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Produit non trouvé</Text>
+        <LoadingState loading={true} error={null} onRetry={refetchProduct}>
+          <></>
+        </LoadingState>
+      </View>
+    );
+  }
+
+  if (productError || !product) {
+    return (
+      <View style={styles.container}>
+        <LoadingState
+          loading={false}
+          error={productError || "Produit introuvable"}
+          onRetry={refetchProduct}
+        >
+          <></>
+        </LoadingState>
       </View>
     );
   }
 
   const getProductIcon = (type: string) => {
     switch (type) {
-      case 'fenetre': return 'albums-outline';
-      case 'porte': return 'exit-outline';
-      case 'portail': return 'grid-outline';
-      case 'volet': return 'layers-outline';
-      default: return 'square-outline';
+      case "fenetre":
+        return "albums-outline";
+      case "porte":
+        return "exit-outline";
+      case "portail":
+        return "grid-outline";
+      case "volet":
+        return "layers-outline";
+      default:
+        return "square-outline";
     }
   };
 
   const handleAddToProject = () => {
     // TODO: Implémenter l'ajout à un projet
-    console.log('Ajouter au projet', product.id);
+    console.log("Ajouter au projet", product.id);
   };
 
   const renderSpecifications = () => (
@@ -59,7 +115,12 @@ export default function ProductDetailScreen() {
         <View style={styles.specGrid}>
           {product.specifications.couleurs?.map((color, index) => (
             <View key={index} style={styles.specChip}>
-              <View style={[styles.colorDot, { backgroundColor: getColorCode(color) }]} />
+              <View
+                style={[
+                  styles.colorDot,
+                  { backgroundColor: getColorCode(color) },
+                ]}
+              />
               <Text style={styles.specChipText}>{color}</Text>
             </View>
           ))}
@@ -100,14 +161,15 @@ export default function ProductDetailScreen() {
     <View style={styles.tabContent}>
       <View style={styles.dimensionCard}>
         <Text style={styles.dimensionTitle}>Dimensions standard</Text>
-        
+
         <View style={styles.dimensionRow}>
           <View style={styles.dimensionItem}>
             <Ionicons name="resize-outline" size={24} color="#2F22CF" />
             <View style={styles.dimensionInfo}>
               <Text style={styles.dimensionLabel}>Largeur</Text>
               <Text style={styles.dimensionValue}>
-                {product.dimensionsParDefaut.largeurMin} - {product.dimensionsParDefaut.largeurMax} mm
+                {product.dimensionsParDefaut.largeurMin} -{" "}
+                {product.dimensionsParDefaut.largeurMax} mm
               </Text>
             </View>
           </View>
@@ -115,18 +177,28 @@ export default function ProductDetailScreen() {
 
         <View style={styles.dimensionRow}>
           <View style={styles.dimensionItem}>
-            <Ionicons name="resize-outline" size={24} color="#2F22CF" style={{ transform: [{ rotate: '90deg' }] }} />
+            <Ionicons
+              name="resize-outline"
+              size={24}
+              color="#2F22CF"
+              style={{ transform: [{ rotate: "90deg" }] }}
+            />
             <View style={styles.dimensionInfo}>
               <Text style={styles.dimensionLabel}>Hauteur</Text>
               <Text style={styles.dimensionValue}>
-                {product.dimensionsParDefaut.hauteurMin} - {product.dimensionsParDefaut.hauteurMax} mm
+                {product.dimensionsParDefaut.hauteurMin} -{" "}
+                {product.dimensionsParDefaut.hauteurMax} mm
               </Text>
             </View>
           </View>
         </View>
 
         <View style={styles.dimensionNote}>
-          <Ionicons name="information-circle-outline" size={20} color="#FF6B35" />
+          <Ionicons
+            name="information-circle-outline"
+            size={20}
+            color="#FF6B35"
+          />
           <Text style={styles.dimensionNoteText}>
             Dimensions personnalisées disponibles sur demande
           </Text>
@@ -135,8 +207,10 @@ export default function ProductDetailScreen() {
 
       <View style={styles.calculatorCard}>
         <Text style={styles.calculatorTitle}>Informations techniques</Text>
-        <Text style={styles.calculatorSubtitle}>Référence produit: {product.id}</Text>
-        
+        <Text style={styles.calculatorSubtitle}>
+          Référence produit: {product.id}
+        </Text>
+
         <View style={styles.calculatorRow}>
           <Text style={styles.calculatorLabel}>Type:</Text>
           <Text style={styles.quantityText}>{product.type}</Text>
@@ -144,12 +218,16 @@ export default function ProductDetailScreen() {
 
         <View style={styles.calculatorRow}>
           <Text style={styles.calculatorLabel}>Créé le:</Text>
-          <Text style={styles.quantityText}>{product.createdAt.toLocaleDateString('fr-FR')}</Text>
+          <Text style={styles.quantityText}>
+            {product.createdAt.toLocaleDateString("fr-FR")}
+          </Text>
         </View>
 
         <View style={styles.calculatorRow}>
           <Text style={styles.calculatorLabel}>Modifié le:</Text>
-          <Text style={styles.quantityText}>{product.updatedAt.toLocaleDateString('fr-FR')}</Text>
+          <Text style={styles.quantityText}>
+            {product.updatedAt.toLocaleDateString("fr-FR")}
+          </Text>
         </View>
       </View>
     </View>
@@ -160,22 +238,36 @@ export default function ProductDetailScreen() {
       {relatedProjects.length > 0 ? (
         <>
           <Text style={styles.projectsTitle}>
-            Utilisé dans {relatedProjects.length} projet{relatedProjects.length > 1 ? 's' : ''}
+            Utilisé dans {relatedProjects.length} projet
+            {relatedProjects.length > 1 ? "s" : ""}
           </Text>
           {relatedProjects.map((project) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={project.id}
               style={styles.projectCard}
               onPress={() => router.push(`/project/${project.id}` as any)}
             >
               <View style={styles.projectHeader}>
                 <Text style={styles.projectName}>{project.nom}</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(project.statut) }]}>
-                  <Text style={styles.statusText}>{getStatusText(project.statut)}</Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    { backgroundColor: getStatusColor(project.statut) },
+                  ]}
+                >
+                  <Text style={styles.statusText}>
+                    {getStatusText(project.statut)}
+                  </Text>
                 </View>
               </View>
-              <Text style={styles.projectClient}>Client: {project.client?.entreprise || `${project.client?.prenom} ${project.client?.nom}`}</Text>
-              <Text style={styles.projectDescription}>{project.description}</Text>
+              <Text style={styles.projectClient}>
+                Client:{" "}
+                {project.client?.entreprise ||
+                  `${project.client?.prenom} ${project.client?.nom}`}
+              </Text>
+              <Text style={styles.projectDescription}>
+                {project.description}
+              </Text>
             </TouchableOpacity>
           ))}
         </>
@@ -193,36 +285,44 @@ export default function ProductDetailScreen() {
 
   const getColorCode = (colorName: string) => {
     const colorMap: { [key: string]: string } = {
-      'Blanc': '#FFFFFF',
-      'Anthracite': '#2F3C3C',
-      'Chêne doré': '#D4A574',
-      'Gris 7016': '#383E42',
-      'Blanc RAL 9016': '#F6F6F6',
-      'Anthracite RAL 7016': '#383E42',
-      'Bronze': '#CD7F32',
-      'Inox': '#C0C0C0',
-      'Chêne': '#8B4513',
-      'Noyer': '#654321',
-      'Vert RAL 6005': '#114232'
+      Blanc: "#FFFFFF",
+      Anthracite: "#2F3C3C",
+      "Chêne doré": "#D4A574",
+      "Gris 7016": "#383E42",
+      "Blanc RAL 9016": "#F6F6F6",
+      "Anthracite RAL 7016": "#383E42",
+      Bronze: "#CD7F32",
+      Inox: "#C0C0C0",
+      Chêne: "#8B4513",
+      Noyer: "#654321",
+      "Vert RAL 6005": "#114232",
     };
-    return colorMap[colorName] || '#CCCCCC';
+    return colorMap[colorName] || "#CCCCCC";
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'en_cours': return '#4CAF50';
-      case 'brouillon': return '#FF9800';
-      case 'termine': return '#2196F3';
-      default: return '#9E9E9E';
+      case "en_cours":
+        return "#4CAF50";
+      case "brouillon":
+        return "#FF9800";
+      case "termine":
+        return "#2196F3";
+      default:
+        return "#9E9E9E";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'en_cours': return 'En cours';
-      case 'brouillon': return 'Brouillon';
-      case 'termine': return 'Terminé';
-      default: return 'Inconnu';
+      case "en_cours":
+        return "En cours";
+      case "brouillon":
+        return "Brouillon";
+      case "termine":
+        return "Terminé";
+      default:
+        return "Inconnu";
     }
   };
 
@@ -230,19 +330,19 @@ export default function ProductDetailScreen() {
     <ScrollView style={styles.container}>
       {/* Header avec informations principales */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        
+
         <View style={styles.headerContent}>
           <View style={styles.productIcon}>
-            <Ionicons 
-              name={getProductIcon(product.type) as any} 
-              size={32} 
-              color="#FFFFFF" 
+            <Ionicons
+              name={getProductIcon(product.type) as any}
+              size={32}
+              color="#FFFFFF"
             />
           </View>
           <View style={styles.headerText}>
@@ -263,36 +363,51 @@ export default function ProductDetailScreen() {
 
       {/* Onglets */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'specs' && styles.activeTab]}
-          onPress={() => setActiveTab('specs')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "specs" && styles.activeTab]}
+          onPress={() => setActiveTab("specs")}
         >
-          <Text style={[styles.tabText, activeTab === 'specs' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "specs" && styles.activeTabText,
+            ]}
+          >
             Spécifications
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'dimensions' && styles.activeTab]}
-          onPress={() => setActiveTab('dimensions')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "dimensions" && styles.activeTab]}
+          onPress={() => setActiveTab("dimensions")}
         >
-          <Text style={[styles.tabText, activeTab === 'dimensions' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "dimensions" && styles.activeTabText,
+            ]}
+          >
             Dimensions
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'projects' && styles.activeTab]}
-          onPress={() => setActiveTab('projects')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "projects" && styles.activeTab]}
+          onPress={() => setActiveTab("projects")}
         >
-          <Text style={[styles.tabText, activeTab === 'projects' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "projects" && styles.activeTabText,
+            ]}
+          >
             Projets
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Contenu des onglets */}
-      {activeTab === 'specs' && renderSpecifications()}
-      {activeTab === 'dimensions' && renderDimensions()}
-      {activeTab === 'projects' && renderProjects()}
+      {activeTab === "specs" && renderSpecifications()}
+      {activeTab === "dimensions" && renderDimensions()}
+      {activeTab === "projects" && renderProjects()}
     </ScrollView>
   );
 }
@@ -305,7 +420,7 @@ const styles = StyleSheet.create((theme) => ({
   errorText: {
     fontSize: theme.typography.fontSize.lg,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xl,
   },
   header: {
@@ -317,16 +432,16 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing.md,
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   productIcon: {
     width: 64,
     height: 64,
     borderRadius: theme.radius.md,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: theme.spacing.md,
   },
   headerText: {
@@ -335,31 +450,31 @@ const styles = StyleSheet.create((theme) => ({
   productName: {
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     marginBottom: theme.spacing.xs,
   },
   categoryName: {
     fontSize: theme.typography.fontSize.sm,
-    color: 'rgba(255,255,255,0.8)',
+    color: "rgba(255,255,255,0.8)",
     marginBottom: theme.spacing.xs,
   },
   productDescription: {
     fontSize: theme.typography.fontSize.sm,
-    color: 'rgba(255,255,255,0.7)',
+    color: "rgba(255,255,255,0.7)",
     lineHeight: theme.typography.lineHeight.sm,
   },
   priceSection: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.lg,
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
   addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: theme.colors.secondary,
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
@@ -369,10 +484,10 @@ const styles = StyleSheet.create((theme) => ({
   addButtonText: {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.medium,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   tabContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: theme.colors.surface,
     marginHorizontal: theme.spacing.md,
     borderRadius: theme.radius.md,
@@ -385,7 +500,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     borderRadius: theme.radius.sm,
-    alignItems: 'center',
+    alignItems: "center",
   },
   activeTab: {
     backgroundColor: theme.colors.primary,
@@ -396,7 +511,7 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: theme.typography.fontWeight.medium,
   },
   activeTabText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   tabContent: {
     padding: theme.spacing.md,
@@ -411,13 +526,13 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing.md,
   },
   specGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.sm,
   },
   specChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: theme.colors.surface,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
@@ -435,7 +550,7 @@ const styles = StyleSheet.create((theme) => ({
     height: 12,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: "#DDD",
   },
   dimensionCard: {
     backgroundColor: theme.colors.surface,
@@ -456,8 +571,8 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing.lg,
   },
   dimensionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   dimensionInfo: {
     marginLeft: theme.spacing.md,
@@ -473,9 +588,9 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.text,
   },
   dimensionNote: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 107, 53, 0.1)",
     padding: theme.spacing.md,
     borderRadius: theme.radius.sm,
     gap: theme.spacing.sm,
@@ -483,7 +598,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   dimensionNoteText: {
     fontSize: theme.typography.fontSize.sm,
-    color: '#FF6B35',
+    color: "#FF6B35",
     flex: 1,
   },
   calculatorCard: {
@@ -506,9 +621,9 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing.lg,
   },
   calculatorRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.lg,
   },
   calculatorLabel: {
@@ -521,7 +636,7 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text,
     minWidth: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   projectsTitle: {
@@ -540,9 +655,9 @@ const styles = StyleSheet.create((theme) => ({
     ...theme.shadows.sm,
   },
   projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   projectName: {
@@ -558,7 +673,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   statusText: {
     fontSize: theme.typography.fontSize.xs,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontWeight: theme.typography.fontWeight.medium,
   },
   projectClient: {
@@ -571,7 +686,7 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textSecondary,
   },
   emptyProjects: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: theme.spacing.xl,
     marginTop: theme.spacing.xl,
   },
@@ -585,6 +700,6 @@ const styles = StyleSheet.create((theme) => ({
   emptyProjectsText: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textTertiary,
-    textAlign: 'center',
+    textAlign: "center",
   },
-})); 
+}));

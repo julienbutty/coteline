@@ -80,19 +80,27 @@ CREATE POLICY "Clients are viewable by authenticated users" ON clients
 
 ### Services disponibles
 
-- `ClientService` - CRUD pour les clients
-- `ProjectService` - (à créer) CRUD pour les projets
-- `ProductService` - (à créer) CRUD pour les produits
+- **`ClientService`** - CRUD complet pour les clients
+  - `getAll()`, `getById()`, `create()`, `update()`, `delete()`, `search()`
+- **`ProductService`** - CRUD pour les produits et catégories
+  - Catégories: `getAllCategories()`, `getCategoryById()`, `createCategory()`
+  - Produits: `getAllProducts()`, `getProductsByCategory()`, `getProductById()`, `createProduct()`, `updateProduct()`, `deleteProduct()`, `searchProducts()`
+- **`ProjectService`** - CRUD pour les projets et produits associés
+  - Projets: `getAllProjects()`, `getProjectsByClient()`, `getProjectById()`, `createProject()`, `updateProject()`, `deleteProject()`, `searchProjects()`
+  - Produits de projet: `getProjectProducts()`, `addProductToProject()`
 
-### Migration depuis les données mockées
+### Migration terminée ✅
 
-Les services Supabase remplacent progressivement les données mock dans `/data/mockData.ts`.
+Toutes les vues de l'application sont maintenant connectées aux services Supabase. Les données mockées ont été supprimées.
 
 ### Scripts disponibles
 
 ```bash
 # Tester la connexion Supabase
 bun run test:supabase
+
+# Tester tous les services
+bun run test:services
 
 # Appliquer les migrations
 bun run db:push
@@ -113,7 +121,9 @@ bun run db:reset
 2. ✅ Service Client implémenté
 3. ✅ CLI Supabase configurée
 4. ✅ Types TypeScript générés
-5. ⏳ Créer ProjectService
-6. ⏳ Créer ProductService
-7. ⏳ Intégrer l'authentification
-8. ⏳ Configurer les politiques RLS
+5. ✅ ProductService créé (produits et catégories)
+6. ✅ ProjectService créé (projets et produits associés)
+7. ✅ Tests automatisés des services
+8. ⏳ Intégrer l'authentification
+9. ⏳ Configurer les politiques RLS
+10. ⏳ Créer les hooks React pour l'UI

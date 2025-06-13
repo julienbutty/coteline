@@ -1,13 +1,15 @@
-import React from 'react';
-import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { clients } from '../../data/mockData';
+import React from "react";
+import { Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useClients } from "../../hooks/useSupabase";
+import { LoadingState } from "../../components/LoadingState";
 
 export default function CustomersScreen() {
   const insets = useSafeAreaInsets();
-  
+  const { data: clients, loading, error, refetch } = useClients();
+
   const handleCustomerPress = (customerId: string) => {
     router.push(`/customer/${customerId}` as any);
   };
@@ -21,46 +23,70 @@ export default function CustomersScreen() {
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>12</Text>
+          <Text style={styles.statNumber}>{clients.length}</Text>
           <Text style={styles.statLabel}>Clients actifs</Text>
         </View>
 
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>28</Text>
-          <Text style={styles.statLabel}>Projets en cours</Text>
+          <Text style={styles.statNumber}>
+            {clients.reduce(
+              (total, client) => total + client.projets.length,
+              0
+            )}
+          </Text>
+          <Text style={styles.statLabel}>Projets associés</Text>
         </View>
 
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>5</Text>
-          <Text style={styles.statLabel}>Devis en attente</Text>
+          <Text style={styles.statNumber}>
+            {
+              clients.filter(
+                (client) =>
+                  client.updatedAt >
+                  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              ).length
+            }
+          </Text>
+          <Text style={styles.statLabel}>Activité récente</Text>
         </View>
       </View>
 
       <View style={styles.recentSection}>
         <Text style={styles.sectionTitle}>Clients récents</Text>
-        
-        {clients.map((client) => (
-          <TouchableOpacity 
-            key={client.id}
-            style={styles.customerCard}
-            onPress={() => handleCustomerPress(client.id)}
-          >
-            <View style={styles.customerInfo}>
-              <Text style={styles.customerName}>
-                {client.entreprise || `${client.prenom} ${client.nom}`}
-              </Text>
-              <Text style={styles.customerProject}>
-                {client.projets.length} projet{client.projets.length > 1 ? 's' : ''} associé{client.projets.length > 1 ? 's' : ''}
-              </Text>
-              <Text style={styles.customerDate}>
-                Dernière activité: {client.updatedAt.toLocaleDateString('fr-FR')}
-              </Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>Actif</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+
+        <LoadingState
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+          isEmpty={clients.length === 0}
+          emptyMessage="Aucun client trouvé"
+        >
+          {clients.map((client) => (
+            <TouchableOpacity
+              key={client.id}
+              style={styles.customerCard}
+              onPress={() => handleCustomerPress(client.id)}
+            >
+              <View style={styles.customerInfo}>
+                <Text style={styles.customerName}>
+                  {client.entreprise || `${client.prenom} ${client.nom}`}
+                </Text>
+                <Text style={styles.customerProject}>
+                  {client.projets.length} projet
+                  {client.projets.length > 1 ? "s" : ""} associé
+                  {client.projets.length > 1 ? "s" : ""}
+                </Text>
+                <Text style={styles.customerDate}>
+                  Dernière activité:{" "}
+                  {client.updatedAt.toLocaleDateString("fr-FR")}
+                </Text>
+              </View>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>Actif</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </LoadingState>
       </View>
     </ScrollView>
   );
@@ -88,7 +114,7 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.textSecondary,
   },
   statsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: theme.spacing.md,
     gap: theme.spacing.sm,
   },
@@ -97,7 +123,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.surface,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadows.sm,
@@ -110,7 +136,7 @@ const styles = StyleSheet.create((theme) => ({
   statLabel: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xs,
   },
   recentSection: {
@@ -127,9 +153,9 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.spacing.lg,
     borderRadius: theme.radius.md,
     marginBottom: theme.spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadows.sm,
@@ -163,7 +189,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   statusText: {
     fontSize: theme.typography.fontSize.xs,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontWeight: theme.typography.fontWeight.medium,
   },
-})); 
+}));
