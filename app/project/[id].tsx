@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useProject } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
@@ -9,6 +10,9 @@ import { Project } from "../../types";
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { theme } = useUnistyles();
+  const insets = useSafeAreaInsets();
+  const styles = stylesheet(theme);
 
   // Récupérer le projet via le hook
   const { data: project, loading, error, refetch } = useProject(id as string);
@@ -41,15 +45,15 @@ export default function ProjectDetailScreen() {
   const getStatusColor = (statut: Project["statut"]) => {
     switch (statut) {
       case "en_cours":
-        return "#4CAF50";
+        return theme.colors.success;
       case "brouillon":
-        return "#FF9800";
+        return theme.colors.warning;
       case "termine":
-        return "#2196F3";
+        return theme.colors.info;
       case "annule":
-        return "#F44336";
+        return theme.colors.error;
       default:
-        return "#757575";
+        return theme.colors.textTertiary;
     }
   };
 
@@ -79,7 +83,7 @@ export default function ProjectDetailScreen() {
   return (
     <ScrollView style={styles.container}>
       {/* Header du projet */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <View style={styles.headerTop}>
           <View style={styles.titleContainer}>
             <Text style={styles.projectName}>{project.nom}</Text>
@@ -115,7 +119,7 @@ export default function ProjectDetailScreen() {
       {/* Informations Client */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <MaterialIcons name="person" size={24} color="#FF6B35" />
+          <MaterialIcons name="person" size={24} color={theme.colors.primary} />
           <Text style={styles.sectionTitle}>Client</Text>
         </View>
 
@@ -131,17 +135,29 @@ export default function ProjectDetailScreen() {
           )}
 
           <View style={styles.contactRow}>
-            <MaterialIcons name="email" size={16} color="#757575" />
+            <MaterialIcons
+              name="email"
+              size={16}
+              color={theme.colors.textSecondary}
+            />
             <Text style={styles.contactText}>{project.client.email}</Text>
           </View>
 
           <View style={styles.contactRow}>
-            <MaterialIcons name="phone" size={16} color="#757575" />
+            <MaterialIcons
+              name="phone"
+              size={16}
+              color={theme.colors.textSecondary}
+            />
             <Text style={styles.contactText}>{project.client.telephone}</Text>
           </View>
 
           <View style={styles.contactRow}>
-            <MaterialIcons name="location-on" size={16} color="#757575" />
+            <MaterialIcons
+              name="location-on"
+              size={16}
+              color={theme.colors.textSecondary}
+            />
             <Text style={styles.contactText}>
               {project.client.adresse.rue}, {project.client.adresse.ville}{" "}
               {project.client.adresse.codePostal}
@@ -154,7 +170,11 @@ export default function ProjectDetailScreen() {
       {project.adresseChantier && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="construction" size={24} color="#FF6B35" />
+            <MaterialIcons
+              name="construction"
+              size={24}
+              color={theme.colors.primary}
+            />
             <Text style={styles.sectionTitle}>Adresse du chantier</Text>
           </View>
 
@@ -174,7 +194,11 @@ export default function ProjectDetailScreen() {
       {(project.dateDebutPrevue || project.dateFinPrevue) && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="schedule" size={24} color="#FF6B35" />
+            <MaterialIcons
+              name="schedule"
+              size={24}
+              color={theme.colors.primary}
+            />
             <Text style={styles.sectionTitle}>Planning</Text>
           </View>
 
@@ -203,12 +227,16 @@ export default function ProjectDetailScreen() {
       {/* Liste des produits */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <MaterialIcons name="inventory" size={24} color="#FF6B35" />
+          <MaterialIcons
+            name="inventory"
+            size={24}
+            color={theme.colors.primary}
+          />
           <Text style={styles.sectionTitle}>
             Produits ({project.produits.length})
           </Text>
           <Pressable style={styles.addButton}>
-            <MaterialIcons name="add" size={20} color="#FF6B35" />
+            <MaterialIcons name="add" size={20} color={theme.colors.primary} />
           </Pressable>
         </View>
 
@@ -295,7 +323,11 @@ export default function ProjectDetailScreen() {
                   style={styles.measureButton}
                   onPress={() => router.push(`/measure/${produit.id}`)}
                 >
-                  <MaterialIcons name="straighten" size={18} color="#FF6B35" />
+                  <MaterialIcons
+                    name="straighten"
+                    size={18}
+                    color={theme.colors.primary}
+                  />
                   <Text style={styles.measureButtonText}>Prendre mesures</Text>
                 </Pressable>
 
@@ -312,7 +344,7 @@ export default function ProjectDetailScreen() {
       {project.notes && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="note" size={24} color="#FF6B35" />
+            <MaterialIcons name="note" size={24} color={theme.colors.primary} />
             <Text style={styles.sectionTitle}>Notes</Text>
           </View>
 
@@ -340,328 +372,329 @@ export default function ProjectDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.lg,
-  },
-  errorText: {
-    fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
-  },
-  backButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  backButtonText: {
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  header: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  headerTop: {
-    marginBottom: theme.spacing.md,
-  },
-  titleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  projectName: {
-    fontSize: theme.typography.fontSize.xxl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text,
-    flex: 1,
-    marginRight: theme.spacing.md,
-  },
-  statusBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.radius.sm,
-  },
-  statusText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  description: {
-    fontSize: theme.typography.fontSize.md,
-    color: theme.colors.textSecondary,
-    lineHeight: theme.typography.lineHeight.md,
-    marginBottom: theme.spacing.md,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.sm,
-  },
-  tag: {
-    backgroundColor: theme.colors.primaryLight,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.radius.round,
-  },
-  tagText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  section: {
-    backgroundColor: theme.colors.surface,
-    marginTop: theme.spacing.sm,
-    padding: theme.spacing.lg,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: theme.spacing.md,
-  },
-  sectionTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginLeft: theme.spacing.sm,
-    flex: 1,
-  },
-  addButton: {
-    padding: theme.spacing.xs,
-  },
-  clientCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  clientName: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  clientContact: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
-  },
-  contactRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: theme.spacing.xs,
-  },
-  contactText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginLeft: theme.spacing.sm,
-    flex: 1,
-  },
-  addressCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  addressText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  planningCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  dateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.xs,
-  },
-  dateLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-  },
-  dateValue: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  budgetCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  budgetRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.xs,
-  },
-  budgetLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-  },
-  budgetValue: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text,
-    fontWeight: theme.typography.fontWeight.semibold,
-  },
-  emptyState: {
-    alignItems: "center",
-    padding: theme.spacing.xl,
-  },
-  emptyText: {
-    fontSize: theme.typography.fontSize.md,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
-  },
-  addProductButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  addProductText: {
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  productCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-    marginBottom: theme.spacing.md,
-    borderLeftWidth: 4,
-    borderLeftColor: theme.colors.primary,
-  },
-  productHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.spacing.sm,
-  },
-  productName: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    flex: 1,
-    marginRight: theme.spacing.sm,
-  },
-  productStatusBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.radius.sm,
-  },
-  productStatusText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  productDescription: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.md,
-  },
-  productDetails: {
-    gap: theme.spacing.sm,
-  },
-  productDetailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  productDetailText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginLeft: theme.spacing.sm,
-  },
-  productNotes: {
-    marginTop: theme.spacing.sm,
-    padding: theme.spacing.sm,
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.radius.sm,
-  },
-  productNotesText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    fontStyle: "italic",
-  },
-  productActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: theme.spacing.md,
-    gap: theme.spacing.sm,
-  },
-  measureButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.primaryLight,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.md,
-    gap: theme.spacing.xs,
-    flex: 1,
-    justifyContent: "center",
-  },
-  measureButtonText: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: "#FF6B35",
-  },
-  editProductButton: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  notesCard: {
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-  },
-  notesText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text,
-    lineHeight: theme.typography.lineHeight.md,
-  },
-  actionsSection: {
-    flexDirection: "row",
-    padding: theme.spacing.lg,
-    gap: theme.spacing.md,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.radius.md,
-    gap: theme.spacing.sm,
-  },
-  actionButtonText: {
-    color: "#FFFFFF",
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  secondaryButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-  },
-  secondaryButtonText: {
-    color: theme.colors.primary,
-  },
-}));
+const stylesheet = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: theme.spacing.lg,
+    },
+    errorText: {
+      fontSize: theme.typography.fontSize.lg,
+      color: theme.colors.textSecondary,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.lg,
+    },
+    backButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    backButtonText: {
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    header: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    headerTop: {
+      marginBottom: theme.spacing.md,
+    },
+    titleContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    projectName: {
+      fontSize: theme.typography.fontSize.xxl,
+      fontWeight: theme.typography.fontWeight.bold,
+      color: theme.colors.text,
+      flex: 1,
+      marginRight: theme.spacing.md,
+    },
+    statusBadge: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.radius.sm,
+    },
+    statusText: {
+      fontSize: theme.typography.fontSize.xs,
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    description: {
+      fontSize: theme.typography.fontSize.md,
+      color: theme.colors.textSecondary,
+      lineHeight: theme.typography.lineHeight.md,
+      marginBottom: theme.spacing.md,
+    },
+    tagsContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: theme.spacing.sm,
+    },
+    tag: {
+      backgroundColor: theme.colors.primaryLight,
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.radius.round,
+    },
+    tagText: {
+      fontSize: theme.typography.fontSize.xs,
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    section: {
+      backgroundColor: theme.colors.surface,
+      marginTop: theme.spacing.sm,
+      padding: theme.spacing.lg,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: theme.spacing.md,
+    },
+    sectionTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginLeft: theme.spacing.sm,
+      flex: 1,
+    },
+    addButton: {
+      padding: theme.spacing.xs,
+    },
+    clientCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    clientName: {
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    clientContact: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.sm,
+    },
+    contactRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: theme.spacing.xs,
+    },
+    contactText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginLeft: theme.spacing.sm,
+      flex: 1,
+    },
+    addressCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    addressText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    planningCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    dateRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.xs,
+    },
+    dateLabel: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+    },
+    dateValue: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.text,
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    budgetCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    budgetRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.xs,
+    },
+    budgetLabel: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+    },
+    budgetValue: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.text,
+      fontWeight: theme.typography.fontWeight.semibold,
+    },
+    emptyState: {
+      alignItems: "center",
+      padding: theme.spacing.xl,
+    },
+    emptyText: {
+      fontSize: theme.typography.fontSize.md,
+      color: theme.colors.textSecondary,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.lg,
+    },
+    addProductButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    addProductText: {
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    productCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      marginBottom: theme.spacing.md,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.colors.primary,
+    },
+    productHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: theme.spacing.sm,
+    },
+    productName: {
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      flex: 1,
+      marginRight: theme.spacing.sm,
+    },
+    productStatusBadge: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.radius.sm,
+    },
+    productStatusText: {
+      fontSize: theme.typography.fontSize.xs,
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    productDescription: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.md,
+    },
+    productDetails: {
+      gap: theme.spacing.sm,
+    },
+    productDetailRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    productDetailText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginLeft: theme.spacing.sm,
+    },
+    productNotes: {
+      marginTop: theme.spacing.sm,
+      padding: theme.spacing.sm,
+      backgroundColor: theme.colors.background,
+      borderRadius: theme.radius.sm,
+    },
+    productNotesText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      fontStyle: "italic",
+    },
+    productActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: theme.spacing.md,
+      gap: theme.spacing.sm,
+    },
+    measureButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.primaryLight,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.md,
+      gap: theme.spacing.xs,
+      flex: 1,
+      justifyContent: "center",
+    },
+    measureButtonText: {
+      fontSize: theme.typography.fontSize.sm,
+      fontWeight: theme.typography.fontWeight.medium,
+      color: theme.colors.surface,
+    },
+    editProductButton: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    notesCard: {
+      backgroundColor: theme.colors.surfaceVariant,
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+    },
+    notesText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.text,
+      lineHeight: theme.typography.lineHeight.md,
+    },
+    actionsSection: {
+      flexDirection: "row",
+      padding: theme.spacing.lg,
+      gap: theme.spacing.md,
+    },
+    actionButton: {
+      flex: 1,
+      backgroundColor: theme.colors.primary,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      gap: theme.spacing.sm,
+    },
+    actionButtonText: {
+      color: "#FFFFFF",
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    secondaryButton: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    secondaryButtonText: {
+      color: theme.colors.primary,
+    },
+  });

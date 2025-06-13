@@ -1,40 +1,40 @@
-import { StyleSheet } from 'react-native-unistyles'
+import { StyleSheet } from "react-native-unistyles";
 
 const lightTheme = {
   colors: {
-    // Couleurs principales menuiserie
-    primary: '#FF6B35', // Orange menuiserie
-    primaryLight: '#FF8A65',
-    primaryDark: '#E64A19',
-    
-    // Couleurs secondaires
-    secondary: '#2E7D32', // Vert nature/bois
-    secondaryLight: '#4CAF50',
-    secondaryDark: '#1B5E20',
-    
-    // Couleurs neutres
-    background: '#FAFAFA',
-    surface: '#FFFFFF',
-    surfaceVariant: '#F5F5F5',
-    
-    // Textes
-    text: '#212121',
-    textSecondary: '#757575',
-    textTertiary: '#9E9E9E',
-    
-    // États
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#F44336',
-    info: '#2196F3',
-    
-    // Bordures et dividers
-    border: '#E0E0E0',
-    divider: '#EEEEEE',
-    
-    // Overlay
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    backdrop: 'rgba(0, 0, 0, 0.3)',
+    // Couleurs principales techniques - Bleu acier industriel
+    primary: "#1E3A8A", // Bleu acier profond
+    primaryLight: "#3B82F6", // Bleu technique clair
+    primaryDark: "#1E40AF", // Bleu marine foncé
+
+    // Couleurs secondaires - Gris métallique
+    secondary: "#475569", // Gris ardoise technique
+    secondaryLight: "#64748B", // Gris métallique clair
+    secondaryDark: "#334155", // Gris anthracite
+
+    // Couleurs neutres - Tons industriels
+    background: "#F8FAFC", // Gris très clair technique
+    surface: "#FFFFFF",
+    surfaceVariant: "#F1F5F9", // Gris clair industriel
+
+    // Textes - Contraste technique
+    text: "#0F172A", // Noir technique
+    textSecondary: "#475569", // Gris technique moyen
+    textTertiary: "#94A3B8", // Gris technique clair
+
+    // États - Palette technique
+    success: "#059669", // Vert technique (validation)
+    warning: "#D97706", // Orange technique (attention)
+    error: "#DC2626", // Rouge technique (erreur)
+    info: "#0284C7", // Bleu info technique
+
+    // Bordures et dividers - Tons métalliques
+    border: "#CBD5E1", // Gris bordure technique
+    divider: "#E2E8F0", // Gris divider clair
+
+    // Overlay - Tons industriels
+    overlay: "rgba(15, 23, 42, 0.6)", // Overlay technique
+    backdrop: "rgba(71, 85, 105, 0.4)", // Backdrop métallique
   },
   spacing: {
     xs: 4,
@@ -67,11 +67,11 @@ const lightTheme = {
     },
     // Poids de police
     fontWeight: {
-      light: '300' as const,
-      regular: '400' as const,
-      medium: '500' as const,
-      semibold: '600' as const,
-      bold: '700' as const,
+      light: "300" as const,
+      regular: "400" as const,
+      medium: "500" as const,
+      semibold: "600" as const,
+      bold: "700" as const,
     },
   },
   radius: {
@@ -103,43 +103,43 @@ const lightTheme = {
     },
   },
   gap: (v: number) => v * 8,
-}
+};
 
 const darkTheme = {
   colors: {
-    // Couleurs principales menuiserie (adaptées dark)
-    primary: '#FF7043',
-    primaryLight: '#FF8A65',
-    primaryDark: '#E64A19',
-    
-    // Couleurs secondaires
-    secondary: '#66BB6A',
-    secondaryLight: '#81C784',
-    secondaryDark: '#4CAF50',
-    
-    // Couleurs neutres dark
-    background: '#121212',
-    surface: '#1E1E1E',
-    surfaceVariant: '#2D2D2D',
-    
-    // Textes dark
-    text: '#FFFFFF',
-    textSecondary: '#B3B3B3',
-    textTertiary: '#757575',
-    
-    // États dark
-    success: '#66BB6A',
-    warning: '#FFB74D',
-    error: '#EF5350',
-    info: '#42A5F5',
-    
-    // Bordures et dividers dark
-    border: '#404040',
-    divider: '#2D2D2D',
-    
-    // Overlay dark
-    overlay: 'rgba(0, 0, 0, 0.7)',
-    backdrop: 'rgba(0, 0, 0, 0.5)',
+    // Couleurs principales techniques dark - Bleu acier industriel
+    primary: "#3B82F6", // Bleu technique lumineux
+    primaryLight: "#60A5FA", // Bleu clair technique
+    primaryDark: "#1D4ED8", // Bleu profond technique
+
+    // Couleurs secondaires dark - Gris métallique
+    secondary: "#64748B", // Gris métallique moyen
+    secondaryLight: "#94A3B8", // Gris métallique clair
+    secondaryDark: "#475569", // Gris ardoise foncé
+
+    // Couleurs neutres dark - Tons industriels sombres
+    background: "#0F172A", // Noir technique profond
+    surface: "#1E293B", // Gris technique foncé
+    surfaceVariant: "#334155", // Gris ardoise moyen
+
+    // Textes dark - Contraste technique inversé
+    text: "#F8FAFC", // Blanc technique
+    textSecondary: "#CBD5E1", // Gris clair technique
+    textTertiary: "#94A3B8", // Gris moyen technique
+
+    // États dark - Palette technique adaptée
+    success: "#10B981", // Vert technique lumineux
+    warning: "#F59E0B", // Orange technique lumineux
+    error: "#EF4444", // Rouge technique lumineux
+    info: "#06B6D4", // Cyan technique
+
+    // Bordures et dividers dark - Tons métalliques sombres
+    border: "#475569", // Gris bordure technique foncé
+    divider: "#334155", // Gris divider foncé
+
+    // Overlay dark - Tons industriels profonds
+    overlay: "rgba(15, 23, 42, 0.8)", // Overlay technique foncé
+    backdrop: "rgba(30, 41, 59, 0.6)", // Backdrop métallique foncé
   },
   spacing: lightTheme.spacing,
   typography: lightTheme.typography,
@@ -165,12 +165,12 @@ const darkTheme = {
     },
   },
   gap: (v: number) => v * 8,
-}
+};
 
 const appThemes = {
   light: lightTheme,
   dark: darkTheme,
-}
+};
 
 const breakpoints = {
   xs: 0,
@@ -179,20 +179,20 @@ const breakpoints = {
   lg: 992,
   xl: 1200,
   xxl: 1400,
-}
+};
 
-type AppBreakpoints = typeof breakpoints
-type AppThemes = typeof appThemes
+type AppBreakpoints = typeof breakpoints;
+type AppThemes = typeof appThemes;
 
-declare module 'react-native-unistyles' {
+declare module "react-native-unistyles" {
   export interface UnistylesThemes extends AppThemes {}
   export interface UnistylesBreakpoints extends AppBreakpoints {}
 }
 
 StyleSheet.configure({
   settings: {
-    initialTheme: 'light',
+    initialTheme: "light",
   },
   breakpoints,
   themes: appThemes,
-}) 
+});

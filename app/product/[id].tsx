@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -20,6 +21,9 @@ const { width: screenWidth } = Dimensions.get("window");
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
+  const { theme } = useUnistyles();
+  const styles = stylesheet(theme);
   const [activeTab, setActiveTab] = useState<
     "specs" | "dimensions" | "projects"
   >("specs");
@@ -329,7 +333,7 @@ export default function ProductDetailScreen() {
   return (
     <ScrollView style={styles.container}>
       {/* Header avec informations principales */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -412,294 +416,295 @@ export default function ProductDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  errorText: {
-    fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.error,
-    textAlign: "center",
-    marginTop: theme.spacing.xl,
-  },
-  header: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.spacing.lg,
-    paddingTop: theme.spacing.xl + 20,
-  },
-  backButton: {
-    marginBottom: theme.spacing.md,
-  },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  productIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: theme.radius.md,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: theme.spacing.md,
-  },
-  headerText: {
-    flex: 1,
-  },
-  productName: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: "#FFFFFF",
-    marginBottom: theme.spacing.xs,
-  },
-  categoryName: {
-    fontSize: theme.typography.fontSize.sm,
-    color: "rgba(255,255,255,0.8)",
-    marginBottom: theme.spacing.xs,
-  },
-  productDescription: {
-    fontSize: theme.typography.fontSize.sm,
-    color: "rgba(255,255,255,0.7)",
-    lineHeight: theme.typography.lineHeight.sm,
-  },
-  priceSection: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.secondary,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.radius.md,
-    gap: theme.spacing.sm,
-  },
-  addButtonText: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: "#FFFFFF",
-  },
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: theme.colors.surface,
-    marginHorizontal: theme.spacing.md,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.xs,
-    marginBottom: theme.spacing.md,
-    marginTop: theme.spacing.md,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
-    borderRadius: theme.radius.sm,
-    alignItems: "center",
-  },
-  activeTab: {
-    backgroundColor: theme.colors.primary,
-  },
-  tabText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  activeTabText: {
-    color: "#FFFFFF",
-  },
-  tabContent: {
-    padding: theme.spacing.md,
-  },
-  specSection: {
-    marginBottom: theme.spacing.xl,
-  },
-  specSectionTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
-  specGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.sm,
-  },
-  specChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.round,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    gap: theme.spacing.xs,
-  },
-  specChipText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text,
-  },
-  colorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#DDD",
-  },
-  dimensionCard: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.sm,
-  },
-  dimensionTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
-  },
-  dimensionRow: {
-    marginBottom: theme.spacing.lg,
-  },
-  dimensionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dimensionInfo: {
-    marginLeft: theme.spacing.md,
-  },
-  dimensionLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xs,
-  },
-  dimensionValue: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-  },
-  dimensionNote: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 107, 53, 0.1)",
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.sm,
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.md,
-  },
-  dimensionNoteText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: "#FF6B35",
-    flex: 1,
-  },
-  calculatorCard: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    ...theme.shadows.sm,
-  },
-  calculatorTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-  },
-  calculatorSubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.lg,
-  },
-  calculatorRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.lg,
-  },
-  calculatorLabel: {
-    fontSize: theme.typography.fontSize.md,
-    color: theme.colors.text,
-  },
+const stylesheet = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    errorText: {
+      fontSize: theme.typography.fontSize.lg,
+      color: theme.colors.error,
+      textAlign: "center",
+      marginTop: theme.spacing.xl,
+    },
+    header: {
+      backgroundColor: theme.colors.primary,
+      padding: theme.spacing.lg,
+      paddingTop: theme.spacing.xl + 20,
+    },
+    backButton: {
+      marginBottom: theme.spacing.md,
+    },
+    headerContent: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    productIcon: {
+      width: 64,
+      height: 64,
+      borderRadius: theme.radius.md,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: theme.spacing.md,
+    },
+    headerText: {
+      flex: 1,
+    },
+    productName: {
+      fontSize: theme.typography.fontSize.xl,
+      fontWeight: theme.typography.fontWeight.bold,
+      color: "#FFFFFF",
+      marginBottom: theme.spacing.xs,
+    },
+    categoryName: {
+      fontSize: theme.typography.fontSize.sm,
+      color: "rgba(255,255,255,0.8)",
+      marginBottom: theme.spacing.xs,
+    },
+    productDescription: {
+      fontSize: theme.typography.fontSize.sm,
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: theme.typography.lineHeight.sm,
+    },
+    priceSection: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: theme.spacing.lg,
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    addButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.secondary,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      gap: theme.spacing.sm,
+    },
+    addButtonText: {
+      fontSize: theme.typography.fontSize.sm,
+      fontWeight: theme.typography.fontWeight.medium,
+      color: "#FFFFFF",
+    },
+    tabContainer: {
+      flexDirection: "row",
+      backgroundColor: theme.colors.surface,
+      marginHorizontal: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      padding: theme.spacing.xs,
+      marginBottom: theme.spacing.md,
+      marginTop: theme.spacing.md,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.md,
+      borderRadius: theme.radius.sm,
+      alignItems: "center",
+    },
+    activeTab: {
+      backgroundColor: theme.colors.primary,
+    },
+    tabText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    activeTabText: {
+      color: "#FFFFFF",
+    },
+    tabContent: {
+      padding: theme.spacing.md,
+    },
+    specSection: {
+      marginBottom: theme.spacing.xl,
+    },
+    specSectionTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.md,
+    },
+    specGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: theme.spacing.sm,
+    },
+    specChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.surface,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.round,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      gap: theme.spacing.xs,
+    },
+    specChipText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.text,
+    },
+    colorDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: "#DDD",
+    },
+    dimensionCard: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.lg,
+      borderRadius: theme.radius.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: theme.spacing.lg,
+      ...theme.shadows.sm,
+    },
+    dimensionTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.lg,
+    },
+    dimensionRow: {
+      marginBottom: theme.spacing.lg,
+    },
+    dimensionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    dimensionInfo: {
+      marginLeft: theme.spacing.md,
+    },
+    dimensionLabel: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.xs,
+    },
+    dimensionValue: {
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+    },
+    dimensionNote: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "rgba(30, 58, 138, 0.1)",
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.sm,
+      gap: theme.spacing.sm,
+      marginTop: theme.spacing.md,
+    },
+    dimensionNoteText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.primary,
+      flex: 1,
+    },
+    calculatorCard: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.lg,
+      borderRadius: theme.radius.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      ...theme.shadows.sm,
+    },
+    calculatorTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.sm,
+    },
+    calculatorSubtitle: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.lg,
+    },
+    calculatorRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.lg,
+    },
+    calculatorLabel: {
+      fontSize: theme.typography.fontSize.md,
+      color: theme.colors.text,
+    },
 
-  quantityText: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    minWidth: 30,
-    textAlign: "center",
-  },
+    quantityText: {
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      minWidth: 30,
+      textAlign: "center",
+    },
 
-  projectsTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
-  projectCard: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.md,
-    marginBottom: theme.spacing.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    ...theme.shadows.sm,
-  },
-  projectHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.sm,
-  },
-  projectName: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text,
-    flex: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.radius.sm,
-  },
-  statusText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: "#FFFFFF",
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  projectClient: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  projectDescription: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textSecondary,
-  },
-  emptyProjects: {
-    alignItems: "center",
-    padding: theme.spacing.xl,
-    marginTop: theme.spacing.xl,
-  },
-  emptyProjectsTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-  },
-  emptyProjectsText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.textTertiary,
-    textAlign: "center",
-  },
-}));
+    projectsTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.md,
+    },
+    projectCard: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.lg,
+      borderRadius: theme.radius.md,
+      marginBottom: theme.spacing.md,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      ...theme.shadows.sm,
+    },
+    projectHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.sm,
+    },
+    projectName: {
+      fontSize: theme.typography.fontSize.md,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      flex: 1,
+    },
+    statusBadge: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.radius.sm,
+    },
+    statusText: {
+      fontSize: theme.typography.fontSize.xs,
+      color: "#FFFFFF",
+      fontWeight: theme.typography.fontWeight.medium,
+    },
+    projectClient: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    projectDescription: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+    },
+    emptyProjects: {
+      alignItems: "center",
+      padding: theme.spacing.xl,
+      marginTop: theme.spacing.xl,
+    },
+    emptyProjectsTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.textSecondary,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+    },
+    emptyProjectsText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textTertiary,
+      textAlign: "center",
+    },
+  });
