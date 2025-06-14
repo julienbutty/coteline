@@ -1,23 +1,42 @@
 import React from "react";
-import { Text, View, Pressable } from "react-native";
+import { Text, View, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useProjects } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
 import { Header } from "../../components/Header";
 import { SafeScrollView } from "../../components/SafeScrollView";
+import { FloatingActionButton } from "../../components/FloatingActionButton";
 
 export default function ProjectsScreen() {
   const { data: projects, loading, error, refetch } = useProjects();
   const { theme } = useUnistyles();
   const styles = stylesheet(theme);
 
+  // Rafraîchir les données quand l'écran devient actif
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("Écran projets focalisé - rafraîchissement des données");
+      refetch();
+    }, [refetch])
+  );
+
   return (
     <>
       <Header
         title="Mes Projets"
-        subtitle="Gestion de vos chantiers menuiserie"
+        subtitle={`${projects.length} projet${
+          projects.length > 1 ? "s" : ""
+        } en cours`}
+        rightComponent={
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push("/project/create")}
+          >
+            <MaterialIcons name="add" size={20} color={theme.colors.surface} />
+          </TouchableOpacity>
+        }
       />
       <SafeScrollView style={styles.container}>
         <View style={styles.statsContainer}>
@@ -192,7 +211,10 @@ export default function ProjectsScreen() {
           <Text style={styles.sectionTitle}>Actions rapides</Text>
 
           <View style={styles.actionsGrid}>
-            <Pressable style={styles.actionCard}>
+            <Pressable
+              style={styles.actionCard}
+              onPress={() => router.push("/project/create")}
+            >
               <MaterialIcons
                 name="add-box"
                 size={32}
@@ -230,6 +252,13 @@ export default function ProjectsScreen() {
           </View>
         </View>
       </SafeScrollView>
+
+      {/* Bouton d'action flottant */}
+      <FloatingActionButton
+        onPress={() => router.push("/project/create")}
+        icon="add"
+        label="Nouveau projet"
+      />
     </>
   );
 }
@@ -387,5 +416,13 @@ const stylesheet = (theme: any) =>
       marginTop: theme.spacing.sm,
       textAlign: "center",
       fontWeight: theme.typography.fontWeight.medium,
+    },
+    addButton: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
     },
   });

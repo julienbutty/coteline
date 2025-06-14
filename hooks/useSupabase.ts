@@ -273,6 +273,37 @@ export function useProjects(): LoadingStateArray<Project> {
     fetchProjects();
   }, [fetchProjects]);
 
+  // Écouter les événements de changement des projets
+  useEffect(() => {
+    const unsubscribeCreated = eventEmitter.on(EVENTS.PROJECT_CREATED, () => {
+      console.log("Projet créé - rafraîchissement de la liste");
+      fetchProjects();
+    });
+
+    const unsubscribeUpdated = eventEmitter.on(EVENTS.PROJECT_UPDATED, () => {
+      console.log("Projet mis à jour - rafraîchissement de la liste");
+      fetchProjects();
+    });
+
+    const unsubscribeDeleted = eventEmitter.on(EVENTS.PROJECT_DELETED, () => {
+      console.log("Projet supprimé - rafraîchissement de la liste");
+      fetchProjects();
+    });
+
+    const unsubscribeRefresh = eventEmitter.on(EVENTS.PROJECTS_REFRESH, () => {
+      console.log("Rafraîchissement manuel des projets");
+      fetchProjects();
+    });
+
+    // Nettoyage des listeners
+    return () => {
+      unsubscribeCreated();
+      unsubscribeUpdated();
+      unsubscribeDeleted();
+      unsubscribeRefresh();
+    };
+  }, [fetchProjects]);
+
   return { data, loading, error, refetch: fetchProjects };
 }
 
@@ -340,4 +371,38 @@ export function useProjectsByClient(
   }, [fetchProjectsByClient]);
 
   return { data, loading, error, refetch: fetchProjectsByClient };
+}
+
+export function useCreateProject() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createProject = useCallback(
+    async (
+      projectData: Omit<
+        Project,
+        "id" | "client" | "produits" | "createdAt" | "updatedAt"
+      >
+    ): Promise<Project | null> => {
+      try {
+        setLoading(true);
+        setError(null);
+        const newProject = await ProjectService.createProject(projectData);
+        return newProject;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la création du projet"
+        );
+        console.error("Erreur useCreateProject:", err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return { createProject, loading, error };
 }
