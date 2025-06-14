@@ -1,6 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ClientService, ProductService, ProjectService } from '../services';
-import type { Client, Product, ProductCategory, Project, ProjectProduct } from '../types';
+import { useState, useEffect, useCallback } from "react";
+import { ClientService, ProductService, ProjectService } from "../services";
+import { eventEmitter, EVENTS } from "../utils/eventEmitter";
+import type {
+  Client,
+  Product,
+  ProductCategory,
+  Project,
+  ProjectProduct,
+} from "../types";
 
 // Types pour les états de chargement
 interface LoadingState<T> {
@@ -31,8 +38,12 @@ export function useClients(): LoadingStateArray<Client> {
       const clients = await ClientService.getAll();
       setData(clients);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des clients');
-      console.error('Erreur useClients:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des clients"
+      );
+      console.error("Erreur useClients:", err);
     } finally {
       setLoading(false);
     }
@@ -40,6 +51,37 @@ export function useClients(): LoadingStateArray<Client> {
 
   useEffect(() => {
     fetchClients();
+  }, [fetchClients]);
+
+  // Écouter les événements de changement des clients
+  useEffect(() => {
+    const unsubscribeCreated = eventEmitter.on(EVENTS.CLIENT_CREATED, () => {
+      console.log("Client créé - rafraîchissement de la liste");
+      fetchClients();
+    });
+
+    const unsubscribeUpdated = eventEmitter.on(EVENTS.CLIENT_UPDATED, () => {
+      console.log("Client mis à jour - rafraîchissement de la liste");
+      fetchClients();
+    });
+
+    const unsubscribeDeleted = eventEmitter.on(EVENTS.CLIENT_DELETED, () => {
+      console.log("Client supprimé - rafraîchissement de la liste");
+      fetchClients();
+    });
+
+    const unsubscribeRefresh = eventEmitter.on(EVENTS.CLIENTS_REFRESH, () => {
+      console.log("Rafraîchissement manuel des clients");
+      fetchClients();
+    });
+
+    // Nettoyage des listeners
+    return () => {
+      unsubscribeCreated();
+      unsubscribeUpdated();
+      unsubscribeDeleted();
+      unsubscribeRefresh();
+    };
   }, [fetchClients]);
 
   return { data, loading, error, refetch: fetchClients };
@@ -52,15 +94,19 @@ export function useClient(id: string): LoadingState<Client> {
 
   const fetchClient = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       const client = await ClientService.getById(id);
       setData(client);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement du client');
-      console.error('Erreur useClient:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du client"
+      );
+      console.error("Erreur useClient:", err);
     } finally {
       setLoading(false);
     }
@@ -71,6 +117,37 @@ export function useClient(id: string): LoadingState<Client> {
   }, [fetchClient]);
 
   return { data, loading, error, refetch: fetchClient };
+}
+
+export function useCreateClient() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createClient = useCallback(
+    async (
+      clientData: Omit<Client, "id" | "createdAt" | "updatedAt" | "projets">
+    ): Promise<Client | null> => {
+      try {
+        setLoading(true);
+        setError(null);
+        const newClient = await ClientService.create(clientData);
+        return newClient;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la création du client"
+        );
+        console.error("Erreur useCreateClient:", err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return { createClient, loading, error };
 }
 
 // ==================== HOOKS PRODUITS ====================
@@ -87,8 +164,12 @@ export function useProducts(): LoadingStateArray<Product> {
       const products = await ProductService.getAllProducts();
       setData(products);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des produits');
-      console.error('Erreur useProducts:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des produits"
+      );
+      console.error("Erreur useProducts:", err);
     } finally {
       setLoading(false);
     }
@@ -113,8 +194,12 @@ export function useProductCategories(): LoadingStateArray<ProductCategory> {
       const categories = await ProductService.getAllCategories();
       setData(categories);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des catégories');
-      console.error('Erreur useProductCategories:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des catégories"
+      );
+      console.error("Erreur useProductCategories:", err);
     } finally {
       setLoading(false);
     }
@@ -134,15 +219,19 @@ export function useProduct(id: string): LoadingState<Product> {
 
   const fetchProduct = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       const product = await ProductService.getProductById(id);
       setData(product);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement du produit');
-      console.error('Erreur useProduct:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du produit"
+      );
+      console.error("Erreur useProduct:", err);
     } finally {
       setLoading(false);
     }
@@ -169,8 +258,12 @@ export function useProjects(): LoadingStateArray<Project> {
       const projects = await ProjectService.getAllProjects();
       setData(projects);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des projets');
-      console.error('Erreur useProjects:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des projets"
+      );
+      console.error("Erreur useProjects:", err);
     } finally {
       setLoading(false);
     }
@@ -190,15 +283,19 @@ export function useProject(id: string): LoadingState<Project> {
 
   const fetchProject = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       const project = await ProjectService.getProjectById(id);
       setData(project);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement du projet');
-      console.error('Erreur useProject:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du projet"
+      );
+      console.error("Erreur useProject:", err);
     } finally {
       setLoading(false);
     }
@@ -211,22 +308,28 @@ export function useProject(id: string): LoadingState<Project> {
   return { data, loading, error, refetch: fetchProject };
 }
 
-export function useProjectsByClient(clientId: string): LoadingStateArray<Project> {
+export function useProjectsByClient(
+  clientId: string
+): LoadingStateArray<Project> {
   const [data, setData] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProjectsByClient = useCallback(async () => {
     if (!clientId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       const projects = await ProjectService.getProjectsByClient(clientId);
       setData(projects);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des projets du client');
-      console.error('Erreur useProjectsByClient:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des projets du client"
+      );
+      console.error("Erreur useProjectsByClient:", err);
     } finally {
       setLoading(false);
     }

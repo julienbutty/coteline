@@ -1,96 +1,82 @@
 import React from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Text } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useClients } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
 import { Header } from "../../components/Header";
-import { SafeScrollView } from "../../components/SafeScrollView";
+import { ContactsList } from "../../components/ContactsList";
+import { FloatingActionButton } from "../../components/FloatingActionButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CustomersScreen() {
   const insets = useSafeAreaInsets();
+  const { theme } = useUnistyles();
   const { data: clients, loading, error, refetch } = useClients();
+
+  // Rafraîchir les données quand l'écran devient actif
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("Écran clients focalisé - rafraîchissement des données");
+      refetch();
+    }, [refetch])
+  );
 
   const handleCustomerPress = (customerId: string) => {
     router.push(`/customer/${customerId}` as any);
   };
 
   return (
-    <>
-      <Header title="Gestion Clients" subtitle="Contacts et projets associés" />
+    <View style={styles.container}>
+      <Header
+        title="Contacts"
+        subtitle={`${clients.length} contact${clients.length > 1 ? "s" : ""}`}
+      />
 
-      <SafeScrollView style={styles.container}>
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{clients.length}</Text>
-            <Text style={styles.statLabel}>Clients actifs</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>
-              {clients.reduce(
-                (total, client) => total + client.projets.length,
-                0
-              )}
-            </Text>
-            <Text style={styles.statLabel}>Projets associés</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>
-              {
-                clients.filter(
-                  (client) =>
-                    client.updatedAt >
-                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                ).length
-              }
-            </Text>
-            <Text style={styles.statLabel}>Activité récente</Text>
-          </View>
+      {/* Statistiques rapides */}
+      {!loading && clients.length > 0 && (
+        <View style={styles.quickStats}>
+          <Text style={styles.quickStatsText}>
+            {clients.reduce(
+              (total, client) => total + client.projets.length,
+              0
+            )}{" "}
+            projets •{" "}
+            {
+              clients.filter(
+                (client) =>
+                  client.updatedAt >
+                  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              ).length
+            }{" "}
+            récents
+          </Text>
         </View>
+      )}
 
-        <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>Clients récents</Text>
+      {/* Liste des contacts */}
+      <LoadingState
+        loading={loading}
+        error={error}
+        onRetry={refetch}
+        isEmpty={clients.length === 0}
+        emptyMessage="Aucun contact enregistré"
+      >
+        <ContactsList
+          clients={clients}
+          onClientPress={handleCustomerPress}
+          loading={loading}
+        />
+      </LoadingState>
 
-          <LoadingState
-            loading={loading}
-            error={error}
-            onRetry={refetch}
-            isEmpty={clients.length === 0}
-            emptyMessage="Aucun client trouvé"
-          >
-            {clients.map((client) => (
-              <TouchableOpacity
-                key={client.id}
-                style={styles.customerCard}
-                onPress={() => handleCustomerPress(client.id)}
-              >
-                <View style={styles.customerInfo}>
-                  <Text style={styles.customerName}>
-                    {client.entreprise || `${client.prenom} ${client.nom}`}
-                  </Text>
-                  <Text style={styles.customerProject}>
-                    {client.projets.length} projet
-                    {client.projets.length > 1 ? "s" : ""} associé
-                    {client.projets.length > 1 ? "s" : ""}
-                  </Text>
-                  <Text style={styles.customerDate}>
-                    Dernière activité:{" "}
-                    {client.updatedAt.toLocaleDateString("fr-FR")}
-                  </Text>
-                </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Actif</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </LoadingState>
-        </View>
-      </SafeScrollView>
-    </>
+      {/* Bouton d'action flottant */}
+      <FloatingActionButton
+        onPress={() => router.push("/customer/create")}
+        icon="person-add"
+        label="Nouveau"
+      />
+    </View>
   );
 }
 
@@ -193,5 +179,38 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.typography.fontSize.xs,
     color: "#FFFFFF",
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+  },
+  refreshButton: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surfaceVariant,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  quickStats: {
+    backgroundColor: theme.colors.surfaceVariant,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  quickStatsText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
   },
 }));
