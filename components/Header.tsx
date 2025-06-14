@@ -1,9 +1,13 @@
-import React from 'react';
-import { View, Text, Pressable, StatusBar } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import React from "react";
+import { View, Text, Pressable, StatusBar } from "react-native";
+import {
+  StyleSheet,
+  useUnistyles,
+  UnistylesRuntime,
+} from "react-native-unistyles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface HeaderProps {
   title: string;
@@ -11,6 +15,7 @@ interface HeaderProps {
   showBackButton?: boolean;
   rightComponent?: React.ReactNode;
   backgroundColor?: string;
+  statusBarStyle?: "light-content" | "dark-content" | "auto";
   onBackPress?: () => void;
 }
 
@@ -20,6 +25,7 @@ export function Header({
   showBackButton = false,
   rightComponent,
   backgroundColor,
+  statusBarStyle = "auto",
   onBackPress,
 }: HeaderProps) {
   const { theme } = useUnistyles();
@@ -34,26 +40,44 @@ export function Header({
     }
   };
 
+  // Déterminer le style de la barre de statut automatiquement
+  const getStatusBarStyle = () => {
+    if (statusBarStyle !== "auto") {
+      return statusBarStyle;
+    }
+
+    // Utiliser UnistylesRuntime pour détecter le thème actuel
+    const currentTheme = UnistylesRuntime.themeName;
+    if (currentTheme === "dark") {
+      return "light-content"; // Texte clair sur fond sombre
+    }
+
+    return "dark-content"; // Texte sombre sur fond clair (défaut)
+  };
+
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={backgroundColor || theme.colors.surface} />
-      <View 
+      <StatusBar
+        barStyle={getStatusBarStyle()}
+        backgroundColor={backgroundColor || theme.colors.surface}
+      />
+      <View
         style={[
           styles.container,
-          { 
+          {
             paddingTop: insets.top,
             backgroundColor: backgroundColor || theme.colors.surface,
-          }
+          },
         ]}
       >
         <View style={styles.content}>
           <View style={styles.leftSection}>
             {showBackButton && (
               <Pressable style={styles.backButton} onPress={handleBackPress}>
-                <MaterialIcons 
-                  name="arrow-back" 
-                  size={24} 
-                  color={theme.colors.text} 
+                <MaterialIcons
+                  name="arrow-back"
+                  size={24}
+                  color={theme.colors.text}
                 />
               </Pressable>
             )}
@@ -62,11 +86,9 @@ export function Header({
               {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
             </View>
           </View>
-          
+
           {rightComponent && (
-            <View style={styles.rightSection}>
-              {rightComponent}
-            </View>
+            <View style={styles.rightSection}>{rightComponent}</View>
           )}
         </View>
       </View>
@@ -83,24 +105,24 @@ const stylesheet = (theme: any) =>
       ...theme.shadows.sm,
     },
     content: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       paddingHorizontal: theme.spacing.md,
       paddingVertical: theme.spacing.md,
       minHeight: 56,
     },
     leftSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       flex: 1,
     },
     backButton: {
       width: 40,
       height: 40,
       borderRadius: theme.radius.md,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginRight: theme.spacing.sm,
       backgroundColor: theme.colors.surfaceVariant,
     },
@@ -120,8 +142,8 @@ const stylesheet = (theme: any) =>
       lineHeight: theme.typography.lineHeight.sm,
     },
     rightSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: theme.spacing.sm,
     },
   });
