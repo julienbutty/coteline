@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useClient, useProjectsByClient } from "../../hooks/useSupabase";
 import { LoadingState } from "../../components/LoadingState";
 
 export default function CustomerDetailScreen() {
+  const { theme } = useUnistyles();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<"info" | "projects" | "history">(
     "info"
@@ -212,19 +213,19 @@ export default function CustomerDetailScreen() {
                 <Text style={styles.sectionTitle}>Coordonnées</Text>
                 <View style={styles.infoCard}>
                   <View style={styles.infoRow}>
-                    <Ionicons name="person" size={20} color="#666" />
+                    <Ionicons name="person" size={20} color={theme.colors.textSecondary} />
                     <Text style={styles.infoText}>
                       {client.prenom} {client.nom}
                     </Text>
                   </View>
                   {client.entreprise && (
                     <View style={styles.infoRow}>
-                      <Ionicons name="business" size={20} color="#666" />
+                      <Ionicons name="business" size={20} color={theme.colors.textSecondary} />
                       <Text style={styles.infoText}>{client.entreprise}</Text>
                     </View>
                   )}
                   <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
-                    <Ionicons name="call" size={20} color="#2F22CF" />
+                    <Ionicons name="call" size={20} color={theme.colors.primary} />
                     <Text style={[styles.infoText, styles.linkText]}>
                       {client.telephone}
                     </Text>
@@ -233,7 +234,7 @@ export default function CustomerDetailScreen() {
                     style={styles.infoRow}
                     onPress={handleEmail}
                   >
-                    <Ionicons name="mail" size={20} color="#2F22CF" />
+                    <Ionicons name="mail" size={20} color={theme.colors.primary} />
                     <Text style={[styles.infoText, styles.linkText]}>
                       {client.email}
                     </Text>
@@ -246,7 +247,7 @@ export default function CustomerDetailScreen() {
                 <Text style={styles.sectionTitle}>Adresse</Text>
                 <View style={styles.infoCard}>
                   <View style={styles.infoRow}>
-                    <Ionicons name="location" size={20} color="#666" />
+                    <Ionicons name="location" size={20} color={theme.colors.textSecondary} />
                     <View style={styles.addressContainer}>
                       <Text style={styles.infoText}>{client.adresse.rue}</Text>
                       <Text style={styles.infoText}>

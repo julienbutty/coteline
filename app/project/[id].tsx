@@ -243,7 +243,10 @@ export default function ProjectDetailScreen() {
             <Text style={styles.sectionTitle}>
               Produits ({project.produits.length})
             </Text>
-            <Pressable style={styles.addButton}>
+            <Pressable 
+              style={styles.addButton}
+              onPress={() => router.push(`/project/add-product/${project.id}`)}
+            >
               <MaterialIcons
                 name="add"
                 size={20}
@@ -256,7 +259,10 @@ export default function ProjectDetailScreen() {
             <View style={styles.emptyState}>
               <MaterialIcons name="inventory" size={48} color="#9E9E9E" />
               <Text style={styles.emptyText}>Aucun produit ajouté</Text>
-              <Pressable style={styles.addProductButton}>
+              <Pressable 
+                style={styles.addProductButton}
+                onPress={() => router.push(`/project/add-product/${project.id}`)}
+              >
                 <Text style={styles.addProductText}>Ajouter un produit</Text>
               </Pressable>
             </View>
@@ -340,20 +346,20 @@ export default function ProjectDetailScreen() {
                 <View style={styles.productActions}>
                   <Pressable
                     style={styles.measureButton}
-                    onPress={() => router.push(`/measure/${produit.id}`)}
+                    onPress={() => router.push(`/project/configure-product/${project.id}/${produit.productId}`)}
                   >
                     <MaterialIcons
-                      name="straighten"
+                      name="edit"
                       size={18}
-                      color={theme.colors.primary}
+                      color={theme.colors.surface}
                     />
                     <Text style={styles.measureButtonText}>
-                      Prendre mesures
+                      Modifier mesures
                     </Text>
                   </Pressable>
 
                   <Pressable style={styles.editProductButton}>
-                    <MaterialIcons name="edit" size={18} color="#757575" />
+                    <MaterialIcons name="delete" size={18} color="#757575" />
                   </Pressable>
                 </View>
               </View>
@@ -644,7 +650,7 @@ const stylesheet = (theme: any) =>
     measureButton: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.colors.primaryLight,
+      backgroundColor: theme.colors.primary,
       paddingHorizontal: theme.spacing.md,
       paddingVertical: theme.spacing.sm,
       borderRadius: theme.radius.md,
